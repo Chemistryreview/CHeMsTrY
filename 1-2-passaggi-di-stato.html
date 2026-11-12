@@ -56,7 +56,7 @@ function drawP(){const g=pg,I=info(EN);g.setTransform(2,0,0,2,0,0);g.fillStyle='
  g.strokeStyle='#b8b5ac';g.lineWidth=2;g.beginPath();g.moveTo(70,1010);g.lineTo(810,1010);g.stroke();
  g.fillStyle=RED;g.font='600 20px '+F;g.fillText('FASE ATTUALE',70,1048);g.fillStyle=INK;g.font='bold 30px '+F;g.fillText(PH[I.k],70,1092);g.font='27px '+F;wrap(g,PHT[I.k],70,1130,740,34);
  if(vis.size===2&&flap){g.save();g.translate(730,120);g.rotate(-.25);g.strokeStyle=g.fillStyle='rgba(181,72,58,.88)';g.lineWidth=5;g.beginPath();g.arc(0,0,64,0,7);g.stroke();g.lineWidth=2;g.beginPath();g.arc(0,0,54,0,7);g.stroke();g.textAlign='center';g.font='bold 22px '+F;g.fillText('PASSAGGI',0,-6);g.font='bold 34px '+F;g.fillText('✓',0,32);g.restore()}
- pt.needsUpdate=true}
+ g.save();g.textAlign='left';g.fillStyle='#2f353b';{const T='Materiale didattico biennio tecnico - Istituto Majorana-Giorgi - Prof. Sara Piano';let fs=22;g.font='italic '+fs+'px '+F;while(g.measureText(T).width>740&&fs>12){fs--;g.font='italic '+fs+'px '+F}g.fillText(T,70,52)}g.restore();pt.needsUpdate=true}
 /* post-it */
 const[ic,ig]=cvs(1024,1024),it=new THREE.CanvasTexture(ic),sm=new THREE.MeshStandardMaterial({color:0xe9d35a,roughness:.9});it.anisotropy=AN;
 const PI=new THREE.Mesh(new THREE.BoxGeometry(1.9,.02,1.9),[sm,sm,new THREE.MeshStandardMaterial({map:it,roughness:.9}),sm,sm,sm]);PI.position.set(-.6,.011,.9);PI.rotation.y=-.08;PI.castShadow=PI.receiveShadow=true;PI.userData.pi=true;S.add(PI);
