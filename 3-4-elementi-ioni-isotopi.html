@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bancone · 3.4 Elementi, ioni, isotopi</title>
+<style>
+:root{--bg:#69737a;--bar:rgba(247,246,241,.94);--ink:#14283c;--ac:#0f8b8d;color-scheme:light dark;box-sizing:border-box}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bar:rgba(22,38,54,.94);--ink:#e6eef5;--ac:#3cc4c6}}
+:root[data-theme="dark"]{--bar:rgba(22,38,54,.94);--ink:#e6eef5;--ac:#3cc4c6}
+html,body{height:100%;margin:0;background:var(--bg);overflow:hidden;font:15px/1.4 "Avenir Next","Segoe UI",system-ui,sans-serif;color:var(--ink)}
+canvas{display:block;touch-action:none}
+#bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;padding:8px 12px;border-radius:24px;background:var(--bar);box-shadow:0 4px 18px #0006;max-width:calc(100% - 20px)}
+#bar button,#bar a{font:inherit;color:var(--ink);background:transparent;border:1.5px solid var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer;text-decoration:none;white-space:nowrap}
+#top{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:12px;right:12px;text-align:center;pointer-events:none}
+#top span{display:inline-block;background:var(--bar);padding:6px 14px;border-radius:999px}
+#msg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff}
+#msg a{color:#9fe}
+button:focus-visible,a:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+</style></head>
+<body>
+<div id="top"><span>Tocca le piastre Petri · tocca il post-it per la risposta · trascina per girare la vista</span></div>
+<div id="msg"><p>Questo prototipo richiede la grafica 3D (WebGL), che qui non è disponibile.<br>Usa la <a href="versione-semplice.html">versione semplice</a>.</p></div>
+<div id="bar"><b>Lezione 3.4 · Elementi, ioni, isotopi</b><span id="pr">0/7 campioni</span><button id="fc">Leggi il foglio</button><button id="rs">Ripristina vista</button><a href="index.html">← Mappa</a><a href="versione-semplice.html">Versione semplice</a></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+let R;try{if(typeof THREE==='undefined')throw 0;R=new THREE.WebGLRenderer({antialias:true})}catch(e){$('#msg').style.display='flex';$('#bar').style.display='none';$('#top').style.display='none';return}
+R.setPixelRatio(Math.min(devicePixelRatio||1,2));R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;document.body.appendChild(R.domElement);
+const AN=R.capabilities&&R.capabilities.getMaxAnisotropy?R.capabilities.getMaxAnisotropy():8;
+const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(40,1,.1,100);S.background=new THREE.Color(0x69737a);
+S.add(new THREE.AmbientLight(0xffffff,.75));
+const L=new THREE.DirectionalLight(0xffffff,.85);L.position.set(-5,9,6);L.castShadow=true;L.shadow.mapSize.set(2048,2048);Object.assign(L.shadow.camera,{left:-11,right:11,top:10,bottom:-10,near:1,far:30});S.add(L);
+const L2=new THREE.DirectionalLight(0xffffff,.4);L2.position.set(5,4,9);S.add(L2);
+function cvs(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return[c,c.getContext('2d')]}
+const F='Georgia,"Times New Roman",serif',INK='#0e141b',RED='#8b1e2d';
+/* ripiano grigio scuro */
+const[bc,bg]=cvs(512,512);bg.fillStyle='#8a9298';bg.fillRect(0,0,512,512);
+for(let i=0;i<2400;i++){bg.fillStyle='rgba('+(Math.random()<.5?'40,48,54':'255,255,255')+','+(.04+Math.random()*.08)+')';bg.fillRect(Math.random()*512,Math.random()*512,1+Math.random()*2,1+Math.random()*2)}
+const bt=new THREE.CanvasTexture(bc);bt.wrapS=bt.wrapT=THREE.RepeatWrapping;bt.repeat.set(5,3.5);bt.anisotropy=AN;
+const bench=new THREE.Mesh(new THREE.PlaneGeometry(40,28),new THREE.MeshStandardMaterial({map:bt,roughness:.75}));bench.rotation.x=-Math.PI/2;bench.receiveShadow=true;S.add(bench);
+function wrap(g,t,x,y,w,lh){let l='';t.split(' ').forEach(p=>{const m=l?l+' '+p:p;if(g.measureText(m).width>w&&l){g.fillText(l,x,y);y+=lh;l=p}else l=m});g.fillText(l,x,y);return y+lh}
+/* foglio di carta (testo ad alta risoluzione) */
+const[pc,pg]=cvs(1760,2448),pt=new THREE.CanvasTexture(pc);pt.anisotropy=AN;
+const PP=new THREE.Group();PP.position.set(-3.9,0,.4);PP.rotation.y=.04;S.add(PP);
+const sh=new THREE.Mesh(new THREE.BoxGeometry(4.6,.03,6.4),new THREE.MeshStandardMaterial({color:0xe8e6df}));sh.position.y=.015;sh.castShadow=sh.receiveShadow=true;PP.add(sh);
+const pl=new THREE.Mesh(new THREE.PlaneGeometry(4.6,6.4),new THREE.MeshStandardMaterial({map:pt,roughness:.9}));pl.rotation.x=-Math.PI/2;pl.position.y=.031;pl.receiveShadow=true;PP.add(pl);
+let flap=false,sel=-1;const vis=new Set();
+const CAP=[["Sodio Na · atomo neutro", "11 protoni e 11 elettroni: carica totale 0. Nel guscio esterno c’è un solo elettrone."], ["Sodio Na⁺ · catione", "Ha perso l’elettrone esterno: ora è fuori dall’atomo (in ambra) e resta il cerchio vuoto. 11 protoni, 10 elettroni, carica +1."], ["Cloro Cl · atomo neutro", "17 protoni e 17 elettroni. Al guscio esterno manca un elettrone per arrivare a 8 (cerchio vuoto)."], ["Cloro Cl⁻ · anione", "Ha acquistato un elettrone (in ambra): 17 protoni, 18 elettroni, carica −1."], ["Protio ¹₁H", "1 protone, 0 neutroni, 1 elettrone: l’isotopo più comune dell’idrogeno."], ["Deuterio ²₁H", "1 protone, 1 neutrone, 1 elettrone: stesso elemento, massa doppia."], ["Trizio ³₁H", "1 protone, 2 neutroni: radioattivo. Isotopi: stesso Z, diverso numero di neutroni."]],LB=["A", "B", "C", "D", "E", "F", "G"];
+function drawP(k){k=k||1;const g=pg,f=n=>Math.round(n*k),L=n=>Math.round(n*k*1.3);g.setTransform(2,0,0,2,0,0);g.fillStyle='#fbfaf6';g.fillRect(0,0,880,1224);
+ g.fillStyle=RED;g.font='600 '+f(20)+'px '+F;g.fillText("LEZIONE 3.4 · ELEMENTI, IONI, ISOTOPI",70,92);
+ g.fillStyle=INK;g.font='bold '+f(64)+'px '+F;let y=wrap(g,"Cosa cambia in un atomo?",70,92+f(70),740,L(64));
+ g.font=f(38)+'px '+F;y=wrap(g,"Protoni, neutroni, elettroni: cambiarne uno cambia cose diverse.",70,y+f(8),740,L(38))+f(10);
+ g.fillStyle=RED;g.font='600 '+f(20)+'px '+F;g.fillText("CHE COSA CAMBIA",70,y);y+=f(42);
+ [["protoni (Z)", "cambia l’elemento", "#d1495b"], ["neutroni", "stesso elemento: isotopo", "#7d8791"], ["elettroni", "stesso elemento: ione", "#0f8b8d"]].forEach(w=>{const x0=w[2]?104:70;if(w[2]){g.fillStyle=w[2];g.beginPath();g.arc(82,y-f(11),f(11),0,7);g.fill()}g.fillStyle=INK;g.font='italic bold '+f(36)+'px '+F;g.fillText(w[0],x0,y);const ww=g.measureText(w[0]+'  ').width;g.font=f(36)+'px '+F;y=wrap(g,w[1],x0+ww,y,810-x0-ww,L(36))+f(8)});
+ y+=f(14);g.fillStyle=RED;g.font='600 '+f(20)+'px '+F;g.fillText('PREVEDI',70,y);y+=f(42);g.fillStyle=INK;g.font=f(36)+'px '+F;y=wrap(g,"Che cosa cambia tra Na e Na⁺? E tra Cl e Cl⁻? E tra ¹H, ²H e ³H? Osserva, poi apri il post-it.",70,y,740,L(36))+f(10);
+ g.fillStyle='#262a30';g.font='italic '+f(27)+'px '+F;
+ ['Cationi: atomi che perdono elettroni (carica +), come Na → Na⁺.','Anioni: atomi che acquistano elettroni (carica −), come Cl → Cl⁻.','Isotopi: stesso elemento (stesso Z), diverso numero di neutroni.','Regola dell’ottetto: gli atomi tendono ad avere 8 elettroni nel livello più esterno (2 per H e He): Na ne perde uno, Cl ne acquista uno.'].forEach(l=>{y=wrap(g,l,70,y+f(14),740,L(27))+f(2)});
+ g.font='italic '+f(23)+'px '+F;y=wrap(g,'Disegni: cerchio vuoto = elettrone perso o mancante; ambra = elettrone ceduto o acquistato.',70,y+f(12),740,L(23))+f(2);
+ if(y>980&&k>.6){drawP(k*.94);return}
+ g.strokeStyle='#b8b5ac';g.lineWidth=2;g.beginPath();g.moveTo(70,1000);g.lineTo(810,1000);g.stroke();
+ g.fillStyle=RED;g.font='600 20px '+F;g.fillText("CAMPIONE",70,1040);g.fillStyle=INK;
+ if(sel<0){g.font='italic 30px '+F;wrap(g,'Tocca un campione.',70,1092,740,38)}
+ else{g.font='bold 30px '+F;g.fillText(CAP[sel][0],70,1088);g.font='28px '+F;wrap(g,CAP[sel][1],70,1128,740,36)}
+ if(vis.size===7&&flap){g.save();g.translate(730,120);g.rotate(-.25);g.strokeStyle=g.fillStyle='rgba(181,72,58,.88)';g.lineWidth=5;g.beginPath();g.arc(0,0,64,0,7);g.stroke();g.lineWidth=2;g.beginPath();g.arc(0,0,54,0,7);g.stroke();g.textAlign='center';g.font='bold 22px '+F;g.fillText("ISOTOPI",0,-6);g.font='bold 34px '+F;g.fillText('✓',0,32);g.restore()}
+ pt.needsUpdate=true}
+/* post-it */
+const[ic,ig]=cvs(1024,1024),it=new THREE.CanvasTexture(ic),sm=new THREE.MeshStandardMaterial({color:0xe9d35a,roughness:.9});it.anisotropy=AN;
+const PI=new THREE.Mesh(new THREE.BoxGeometry(1.9,.02,1.9),[sm,sm,new THREE.MeshStandardMaterial({map:it,roughness:.9}),sm,sm,sm]);PI.position.set(-.6,.011,.9);PI.rotation.y=-.08;PI.castShadow=PI.receiveShadow=true;PI.userData.pi=true;S.add(PI);
+function drawPI(){const g=ig,H='"Trebuchet MS","Segoe UI",Arial,sans-serif';g.setTransform(2,0,0,2,0,0);g.fillStyle='#f6e36a';g.fillRect(0,0,512,512);g.fillStyle='rgba(0,0,0,.07)';g.fillRect(0,0,512,36);g.fillStyle='#1f1805';
+ if(flap){g.font='bold 40px '+H;g.fillText('Risposta',32,96);g.font='bold 34px '+H;wrap(g,'Tra gli isotopi cambiano i neutroni (la massa). Tra atomo e ione cambiano gli elettroni (la carica).',32,150,448,44)}
+ else{g.font='bold 66px '+H;g.fillText('Perché?',32,130);g.font='bold 34px '+H;wrap(g,'Prima fai la tua previsione, poi tocca il post-it.',32,200,448,44)}
+ it.needsUpdate=true}
+/* piastre Petri e campioni a inchiostro */
+const COR=0xd1495b,TEA=0x0f8b8d,AMB=0xe0a100,OL=new THREE.MeshBasicMaterial({color:0x14283c,side:THREE.BackSide}),G=[],E=[],PK=[],DM=[];
+const DX=[0],DZ=[0];
+function dish(x,z){const gm=new THREE.MeshPhysicalMaterial({color:0xe8f4f6,transparent:true,opacity:.3,roughness:.05,clearcoat:1,clearcoatRoughness:.05,side:THREE.DoubleSide,depthWrite:false}),T=(c,o,r)=>new THREE.MeshStandardMaterial({color:c,transparent:true,opacity:o,roughness:r});
+ const b=new THREE.Mesh(new THREE.CylinderGeometry(1.02,1.02,.035,64),gm),w=new THREE.Mesh(new THREE.CylinderGeometry(1.08,1.02,.18,64,1,true),gm),
+ a=new THREE.Mesh(new THREE.CylinderGeometry(.97,.97,.05,64),T(0xf0dfa0,.8,.4)),r=new THREE.Mesh(new THREE.TorusGeometry(1.08,.03,10,64),T(0xffffff,.6,.1)),m=new THREE.Mesh(new THREE.TorusGeometry(.97,.018,8,64),T(0xfff3c4,.9,.3)),
+ k=new THREE.Mesh(new THREE.RingGeometry(1.03,1.09,64),new THREE.MeshBasicMaterial({color:0x14283c,side:THREE.DoubleSide})),s=new THREE.Mesh(new THREE.CircleGeometry(1.3,48),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.22}));
+ b.position.set(x,.0175,z);w.position.set(x,.125,z);a.position.set(x,.06,z);r.position.set(x,.215,z);m.position.set(x,.085,z);k.position.set(x,.004,z);s.position.set(x,.002,z);
+ r.rotation.x=m.rotation.x=Math.PI/2;k.rotation.x=s.rotation.x=-Math.PI/2;b.receiveShadow=a.receiveShadow=true;
+ const o=[b,w,a,r,m];[s,k].concat(o).forEach(q=>S.add(q));return o}
+function tag(t,x,z){const[c,g]=cvs(512,192),p=t.split(' · ');g.fillStyle='#fbfaf6';g.fillRect(0,0,512,192);g.strokeStyle='#777';g.lineWidth=6;g.strokeRect(3,3,506,186);g.textAlign='center';
+ g.fillStyle=RED;g.font='bold 54px '+F;g.fillText(p[0],256,66);g.fillStyle=INK;let fs=76;g.font='bold '+fs+'px '+F;while(g.measureText(p[1]).width>470&&fs>28){fs-=2;g.font='bold '+fs+'px '+F}g.fillText(p[1],256,156);
+ const tx=new THREE.CanvasTexture(c);tx.anisotropy=AN;const m=new THREE.Mesh(new THREE.PlaneGeometry(2.2,.825),new THREE.MeshStandardMaterial({map:tx,roughness:.9}));m.rotation.x=-1;m.position.set(x,.26,z);m.castShadow=m.receiveShadow=true;S.add(m)}
+function tape(s,x,z,ang,col,w){w=w||1.5;const L=s.split('|'),n=L.length,hp=n===1?160:100+n*70,[c,g]=cvs(512,hp),H='"Segoe Print","Bradley Hand","Comic Sans MS","Trebuchet MS",cursive';
+ g.beginPath();g.moveTo(14,10);g.lineTo(498,10);for(let y=32,k=0;y<hp-12;y+=22,k++)g.lineTo(k%2?498:506,y);g.lineTo(498,hp-10);g.lineTo(14,hp-10);for(let y=hp-32,k=0;y>12;y-=22,k++)g.lineTo(k%2?14:6,y);g.closePath();
+ g.fillStyle=col;g.fill();g.save();g.clip();for(let i=0;i<900;i++){g.fillStyle='rgba('+(Math.random()<.5?'120,100,60':'255,255,255')+','+(.04+Math.random()*.08)+')';g.fillRect(Math.random()*512,Math.random()*hp,1+Math.random()*3,1)}
+ g.fillStyle='rgba(255,255,255,.18)';g.fillRect(0,18,512,22);g.restore();
+ g.textAlign='center';g.fillStyle='#18203a';L.forEach((t,i)=>{let fs=n===1?84:i?52:76;g.font='bold '+fs+'px '+H;while(g.measureText(t).width>410&&fs>24){fs-=2;g.font='bold '+fs+'px '+H}g.fillText(t,256,n===1?104:34+(hp-48)*(i+.78)/n)});
+ const tx=new THREE.CanvasTexture(c);tx.anisotropy=AN;const m=new THREE.Mesh(new THREE.PlaneGeometry(w,w*hp/512),new THREE.MeshStandardMaterial({map:tx,transparent:true,roughness:.95,depthWrite:false}));m.rotation.set(-Math.PI/2,0,ang||0);m.position.set(x,.01,z);m.receiveShadow=true;S.add(m)}
+function ball(r,c){const m=new THREE.Mesh(new THREE.SphereGeometry(r,24,16),new THREE.MeshToonMaterial({color:c}));m.castShadow=true;const o=new THREE.Mesh(m.geometry,OL);o.scale.setScalar(1.12);m.add(o);return m}
+function stick(a,b){const d=new THREE.Vector3().subVectors(b,a),m=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,d.length(),8),new THREE.MeshToonMaterial({color:0x55606b}));m.position.copy(a).addScaledVector(d,.5);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.clone().normalize());m.castShadow=true;return m}
+function grp(i,y){const g=new THREE.Group();g.position.set(DX[i],y,DZ[i]);g.userData={y:y,s:.9};g.scale.setScalar(.9);S.add(g);G.push(g);DM.push(dish(DX[i],DZ[i]));tape(['x'][i],DX[i],DZ[i],0,'rgba(0,0,0,0)');return g}
+const ATM=[],RG=[.26,.46,.66],SLN=[2,8,8];
+function dish2(x,z,s){const dg=new THREE.Group();dg.position.set(x,0,z);dg.scale.setScalar(s);S.add(dg);
+ const gm=new THREE.MeshPhysicalMaterial({color:0xe8f4f6,transparent:true,opacity:.3,roughness:.05,clearcoat:1,clearcoatRoughness:.05,side:THREE.DoubleSide,depthWrite:false}),M=(c,o,r)=>new THREE.MeshStandardMaterial({color:c,transparent:true,opacity:o,roughness:r});
+ const b=new THREE.Mesh(new THREE.CylinderGeometry(1.02,1.02,.035,64),gm),w=new THREE.Mesh(new THREE.CylinderGeometry(1.08,1.02,.18,64,1,true),gm),a=new THREE.Mesh(new THREE.CylinderGeometry(.97,.97,.05,64),M(0xf0dfa0,.8,.4)),r=new THREE.Mesh(new THREE.TorusGeometry(1.08,.03,10,64),M(0xffffff,.6,.1)),m=new THREE.Mesh(new THREE.TorusGeometry(.97,.018,8,64),M(0xfff3c4,.9,.3)),
+ k=new THREE.Mesh(new THREE.RingGeometry(1.03,1.09,64),new THREE.MeshBasicMaterial({color:0x14283c,side:THREE.DoubleSide})),sh=new THREE.Mesh(new THREE.CircleGeometry(1.3,48),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.22}));
+ b.position.y=.0175;w.position.y=.125;a.position.y=.06;r.position.y=.215;m.position.y=.085;k.position.y=.004;sh.position.y=.002;r.rotation.x=m.rotation.x=Math.PI/2;k.rotation.x=sh.rotation.x=-Math.PI/2;b.receiveShadow=a.receiveShadow=true;
+ [sh,k,b,w,a,r,m].forEach(q=>dg.add(q));return[b,w,a,r,m]}
+const mkE=(r,c)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(r,14,10),new THREE.MeshToonMaterial({color:c})),o=new THREE.Mesh(m.geometry,OL);o.scale.setScalar(1.18);m.add(o);return m};
+function nucTex(Z){const[c,g]=cvs(128,128);g.fillStyle='#d1495b';g.beginPath();g.arc(64,64,62,0,7);g.fill();g.fillStyle='#fff';g.textAlign='center';g.font='bold 52px '+F;g.fillText('+'+Z,64,82);const t=new THREE.CanvasTexture(c);t.anisotropy=AN;return t}
+function atom(x,z,Z,N,rings,dimLast){const g=new THREE.Group();g.position.set(x,.11,z);S.add(g);G.push(g);DM.push(dish2(x,z,.78));
+ if(Z<=3){const tot=1+N,P=[[[0,0]],[[-.09,0],[.09,0]],[[0,.1],[-.09,-.06],[.09,-.06]]][tot-1];P.forEach((p,i)=>{const m=mkE(.085,i?0x7d8791:COR);m.position.set(p[0],0,p[1]);g.add(m)})}
+ else{const nu=new THREE.Mesh(new THREE.CircleGeometry(.17,32),new THREE.MeshBasicMaterial({map:nucTex(Z),transparent:true}));nu.rotation.x=-Math.PI/2;nu.position.y=.004;g.add(nu);const ob=new THREE.Mesh(new THREE.RingGeometry(.17,.19,32),new THREE.MeshBasicMaterial({color:0x14283c,side:THREE.DoubleSide}));ob.rotation.x=-Math.PI/2;ob.position.y=.003;g.add(ob)}
+ const rs=[];rings.forEach((ent,k)=>{const rg=new THREE.Group(),R=RG[k],dim=dimLast&&k===rings.length-1;
+  const c=new THREE.Mesh(new THREE.TorusGeometry(R,.007,6,64),new THREE.MeshBasicMaterial({color:0x55606b,transparent:true,opacity:dim?.25:.7}));c.rotation.x=Math.PI/2;rg.add(c);
+  ent.forEach((ty,j)=>{const an=j*6.2832/SLN[k]+k*.4;let m;
+   if(ty==='e')m=mkE(.048,TEA);
+   else if(ty==='n'){m=mkE(.06,AMB);const h=new THREE.Mesh(new THREE.RingGeometry(.075,.1,24),new THREE.MeshBasicMaterial({color:AMB,side:THREE.DoubleSide}));h.rotation.x=-Math.PI/2;m.add(h)}
+   else{m=new THREE.Mesh(new THREE.RingGeometry(.035,.065,24),new THREE.MeshBasicMaterial({color:TEA,side:THREE.DoubleSide}));m.rotation.x=-Math.PI/2}
+   m.position.set(Math.cos(an)*R,0,Math.sin(an)*R);rg.add(m)});
+  g.add(rg);rs.push(rg)});ATM.push(rs);return g}
+const E2=['e','e'],E8=Array(8).fill('e'),E7=Array(7).fill('e');
+atom(1.5,-2.7,11,12,[E2,E8,['e']]);
+const aNaP=atom(3.5,-2.7,11,12,[E2,E8,['g']],true);
+atom(1.5,0,17,18,[E2,E8,[...E7,'g']]);
+atom(3.5,0,17,18,[E2,E8,[...E7,'n']]);
+atom(1.5,2.7,1,0,[['e']]);atom(3.5,2.7,1,1,[['e']]);atom(5.5,2.7,1,2,[['e']]);
+const FREE=mkE(.075,AMB);{const h=new THREE.Mesh(new THREE.RingGeometry(.09,.12,24),new THREE.MeshBasicMaterial({color:AMB,side:THREE.DoubleSide}));h.rotation.x=-Math.PI/2;FREE.add(h)}FREE.position.set(1.45,0,0);aNaP.add(FREE);
+const TC=['rgba(190,235,170,.96)','rgba(255,179,193,.96)','rgba(190,235,170,.96)','rgba(170,215,250,.96)','rgba(242,212,138,.96)','rgba(242,212,138,.96)','rgba(242,212,138,.96)'];
+[['Sodio|Na',1.5,-2.7],['Sodio|Na⁺ · catione',3.5,-2.7],['Cloro|Cl',1.5,0],['Cloro|Cl⁻ · anione',3.5,0],['Protio|¹₁H',1.5,2.7],['Deuterio|²₁H',3.5,2.7],['Trizio|³₁H',5.5,2.7]].forEach((q,i)=>tape(q[0],q[1],q[2]+1.27,[-.05,.04,-.03,.05,-.04,.03,-.05][i],TC[i]));
+tape('elettrone perso',4.95,-2.15,.03,'rgba(242,212,138,.96)',1.5);
+function simStep(dt,t){ATM.forEach(rs=>rs.forEach((rg,k)=>{rg.rotation.y=t*(k%2?-1:1)*(.5-.12*k)}));FREE.position.set(1.45+Math.sin(t*1.6)*.1,Math.sin(t*3)*.03,Math.cos(t*1.3)*.08)}
+G.forEach((gr,i)=>{gr.traverse(o=>{if(o.isMesh){o.userData.gi=i;PK.push(o)}});DM[i].forEach(o=>{o.userData.gi=i;PK.push(o)})});
+/* camera e interazione */
+let yaw=0,pit=1.1,zm=1,focus=0,fz=0;const TA=new THREE.Vector3(.1,.3,1.35),TP=new THREE.Vector3(-3.9,.3,.4);
+function cam(){const a=innerWidth/innerHeight,d1=Math.max(13.6,7/(.364*a)),d2=1.12*Math.max(3.3/.364,2.5/(.364*a));fz+=(focus-fz)*.08;const d=(d1+(d2-d1)*fz)*zm,t=TA.clone().lerp(TP,fz);C.position.set(t.x+d*Math.sin(yaw)*Math.cos(pit),t.y+d*Math.sin(pit),t.z+d*Math.cos(yaw)*Math.cos(pit));C.lookAt(t)}
+$('#fc').onclick=()=>{focus=focus?0:1;$('#fc').textContent=focus?'Vista d’insieme':'Leggi il foglio'};
+function rs(){R.setSize(innerWidth,innerHeight);C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix()}
+function upd(){$('#pr').textContent=vis.size+'/7 campioni'+(flap?' · post-it aperto':'');drawP();drawPI()}
+const RC=new THREE.Raycaster();
+function pick(e){RC.setFromCamera(new THREE.Vector2(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1),C);const h=RC.intersectObjects(PK.concat([PI]),false)[0];if(!h)return;
+ if(h.object.userData.gi!==undefined){sel=h.object.userData.gi;vis.add(sel)}else if(h.object.userData.pi)flap=!flap;
+ upd()}
+let dn=null,dr=false;const el=R.domElement;
+el.addEventListener('pointerdown',e=>{dn={x:e.clientX,y:e.clientY};dr=false;el.setPointerCapture(e.pointerId)});
+el.addEventListener('pointermove',e=>{if(!dn)return;const dx=e.clientX-dn.x,dy=e.clientY-dn.y;if(!dr&&Math.hypot(dx,dy)>6)dr=true;if(dr){yaw=Math.max(-.7,Math.min(.7,yaw-dx*.005));pit=Math.max(.6,Math.min(1.4,pit+dy*.004));dn={x:e.clientX,y:e.clientY}}});
+el.addEventListener('pointerup',e=>{if(dn&&!dr)pick(e);dn=null});
+el.addEventListener('pointercancel',()=>{dn=null});
+el.addEventListener('wheel',e=>{e.preventDefault();zm=Math.max(.45,Math.min(1.5,zm*(e.deltaY>0?1.08:.92)))},{passive:false});
+$('#rs').onclick=()=>{yaw=0;pit=1.1;zm=1;focus=0;$('#fc').textContent='Leggi il foglio'};
+function frame(t){requestAnimationFrame(frame);t*=.001;
+ const dt=Math.min(.05,t-(frame.p||t));frame.p=t;simStep(dt,t);G.forEach((o,i)=>{const k=i===sel?1.2:1;o.scale.x+=(k-o.scale.x)*.12;o.scale.y=o.scale.z=o.scale.x});
+ 
+ PI.position.y+=((flap?.3:.011)-PI.position.y)*.15;PI.rotation.x+=((flap?-.15:0)-PI.rotation.x)*.15;
+ cam();R.render(S,C)}
+drawP();drawPI();rs();addEventListener('resize',rs);requestAnimationFrame(frame);
+})();
+</script>
+</body></html>

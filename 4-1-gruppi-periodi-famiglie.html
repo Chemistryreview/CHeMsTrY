@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bancone · 4.1 Gruppi, periodi, famiglie</title>
+<style>
+:root{--bg:#69737a;--bar:rgba(247,246,241,.94);--ink:#14283c;--ac:#0f8b8d;color-scheme:light dark;box-sizing:border-box}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bar:rgba(22,38,54,.94);--ink:#e6eef5;--ac:#3cc4c6}}
+:root[data-theme="dark"]{--bar:rgba(22,38,54,.94);--ink:#e6eef5;--ac:#3cc4c6}
+html,body{height:100%;margin:0;background:var(--bg);overflow:hidden;font:15px/1.4 "Avenir Next","Segoe UI",system-ui,sans-serif;color:var(--ink)}
+canvas{display:block;touch-action:none}
+#bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;padding:8px 12px;border-radius:24px;background:var(--bar);box-shadow:0 4px 18px #0006;max-width:calc(100% - 20px)}
+#bar button,#bar a{font:inherit;color:var(--ink);background:transparent;border:1.5px solid var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer;text-decoration:none;white-space:nowrap}
+#top{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:12px;right:12px;text-align:center;pointer-events:none}
+#top span{display:inline-block;background:var(--bar);padding:6px 14px;border-radius:999px}
+#msg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff}
+#msg a{color:#9fe}
+button:focus-visible,a:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+</style></head>
+<body>
+<div id="top"><span>Tocca le tessere · cambia modalità (Famiglie, Gruppi, Periodi) · tocca il post-it per la risposta · trascina per girare la vista</span></div>
+<div id="msg"><p>Questo prototipo richiede la grafica 3D (WebGL), che qui non è disponibile.<br>Usa la <a href="versione-semplice.html">versione semplice</a>.</p></div>
+<div id="bar"><b>Lezione 4.1 · Gruppi, periodi, famiglie</b><button id="m1">Famiglie</button><button id="m2">Gruppi</button><button id="m3">Periodi</button><span id="pr">0/10 famiglie</span><button id="fc">Leggi il foglio</button><button id="rs">Ripristina vista</button><a href="index.html">← Mappa</a><a href="versione-semplice.html">Versione semplice</a></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+let R;try{if(typeof THREE==='undefined')throw 0;R=new THREE.WebGLRenderer({antialias:true})}catch(e){$('#msg').style.display='flex';$('#bar').style.display='none';$('#top').style.display='none';return}
+R.setPixelRatio(Math.min(devicePixelRatio||1,2));R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;document.body.appendChild(R.domElement);
+const AN=R.capabilities&&R.capabilities.getMaxAnisotropy?R.capabilities.getMaxAnisotropy():8;
+const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(40,1,.1,100);S.background=new THREE.Color(0x69737a);
+S.add(new THREE.AmbientLight(0xffffff,.75));
+const L=new THREE.DirectionalLight(0xffffff,.85);L.position.set(-5,9,6);L.castShadow=true;L.shadow.mapSize.set(2048,2048);Object.assign(L.shadow.camera,{left:-11,right:11,top:10,bottom:-10,near:1,far:30});S.add(L);
+const L2=new THREE.DirectionalLight(0xffffff,.4);L2.position.set(5,4,9);S.add(L2);
+function cvs(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return[c,c.getContext('2d')]}
+const F='Georgia,"Times New Roman",serif',INK='#0e141b',RED='#8b1e2d';
+/* ripiano grigio scuro */
+const[bc,bg]=cvs(512,512);bg.fillStyle='#8a9298';bg.fillRect(0,0,512,512);
+for(let i=0;i<2400;i++){bg.fillStyle='rgba('+(Math.random()<.5?'40,48,54':'255,255,255')+','+(.04+Math.random()*.08)+')';bg.fillRect(Math.random()*512,Math.random()*512,1+Math.random()*2,1+Math.random()*2)}
+const bt=new THREE.CanvasTexture(bc);bt.wrapS=bt.wrapT=THREE.RepeatWrapping;bt.repeat.set(5,3.5);bt.anisotropy=AN;
+const bench=new THREE.Mesh(new THREE.PlaneGeometry(40,28),new THREE.MeshStandardMaterial({map:bt,roughness:.75}));bench.rotation.x=-Math.PI/2;bench.receiveShadow=true;S.add(bench);
+function wrap(g,t,x,y,w,lh){let l='';t.split(' ').forEach(p=>{const m=l?l+' '+p:p;if(g.measureText(m).width>w&&l){g.fillText(l,x,y);y+=lh;l=p}else l=m});g.fillText(l,x,y);return y+lh}
+/* foglio di carta (testo ad alta risoluzione) */
+const[pc,pg]=cvs(1760,2448),pt=new THREE.CanvasTexture(pc);pt.anisotropy=AN;
+const PP=new THREE.Group();PP.position.set(-3.9,0,.4);PP.rotation.y=.04;S.add(PP);
+const sh=new THREE.Mesh(new THREE.BoxGeometry(4.6,.03,6.4),new THREE.MeshStandardMaterial({color:0xe8e6df}));sh.position.y=.015;sh.castShadow=sh.receiveShadow=true;PP.add(sh);
+const pl=new THREE.Mesh(new THREE.PlaneGeometry(4.6,6.4),new THREE.MeshStandardMaterial({map:pt,roughness:.9}));pl.rotation.x=-Math.PI/2;pl.position.y=.031;pl.receiveShadow=true;PP.add(pl);
+let flap=false,sel=-1;const vis=new Set();
+let CAP=[];
+function drawP(k){k=k||1;const g=pg,f=n=>Math.round(n*k),L=n=>Math.round(n*k*1.3);g.setTransform(2,0,0,2,0,0);g.fillStyle='#fbfaf6';g.fillRect(0,0,880,1224);
+ g.fillStyle=RED;g.font='600 '+f(20)+'px '+F;g.fillText("LEZIONE 4.1 · GRUPPI, PERIODI, FAMIGLIE",70,92);
+ g.fillStyle=INK;g.font='bold '+f(64)+'px '+F;let y=wrap(g,"Come è organizzata la tavola?",70,92+f(70),740,L(64));
+ g.font=f(38)+'px '+F;y=wrap(g,"Gli elementi sono ordinati per numero atomico crescente (Z).",70,y+f(8),740,L(38))+f(10);
+ g.fillStyle=RED;g.font='600 '+f(20)+'px '+F;g.fillText("COME LEGGERLA",70,y);y+=f(42);
+ [["gruppo", "colonna: stessi elettroni di valenza", null], ["periodo", "riga: stesso numero di gusci", null], ["famiglia", "insieme di elementi con proprietà simili (alcalini, alogeni…)", null]].forEach(w=>{const x0=w[2]?104:70;if(w[2]){g.fillStyle=w[2];g.beginPath();g.arc(82,y-f(11),f(11),0,7);g.fill()}g.fillStyle=INK;g.font='italic bold '+f(36)+'px '+F;g.fillText(w[0],x0,y);const ww=g.measureText(w[0]+'  ').width;g.font=f(36)+'px '+F;y=wrap(g,w[1],x0+ww,y,810-x0-ww,L(36))+f(8)});
+ y+=f(14);g.fillStyle=RED;g.font='600 '+f(20)+'px '+F;g.fillText('PREVEDI',70,y);y+=f(42);g.fillStyle=INK;g.font=f(36)+'px '+F;y=wrap(g,"Perché Li, Na e K si comportano in modo simile? Dove stanno i metalli e dove i non metalli? Tocca le tessere e cambia modalità, poi apri il post-it.",70,y,740,L(36))+f(10);
+ g.fillStyle='#262a30';g.font='italic '+f(28)+'px '+F;y=wrap(g,'Metalli a sinistra e al centro, non metalli a destra; i semimetalli (B, Si, Ge, As, Sb, Te) fanno da confine. Lantanidi e attinidi stanno sotto per non allargare la tavola.',70,y+f(16),740,L(28))+f(4);
+ if(y>980&&k>.6){drawP(k*.94);return}
+ g.strokeStyle='#b8b5ac';g.lineWidth=2;g.beginPath();g.moveTo(70,1000);g.lineTo(810,1000);g.stroke();
+ g.fillStyle=RED;g.font='600 20px '+F;g.fillText("ELEMENTO",70,1040);g.fillStyle=INK;
+ if(sel<0){g.font='italic 30px '+F;wrap(g,'Tocca una tessera.',70,1092,740,38)}
+ else{g.font='bold 30px '+F;g.fillText(CAP[sel][0],70,1088);g.font='28px '+F;wrap(g,CAP[sel][1],70,1128,740,36)}
+ if(vis.size===10&&flap){g.save();g.translate(730,120);g.rotate(-.25);g.strokeStyle=g.fillStyle='rgba(181,72,58,.88)';g.lineWidth=5;g.beginPath();g.arc(0,0,64,0,7);g.stroke();g.lineWidth=2;g.beginPath();g.arc(0,0,54,0,7);g.stroke();g.textAlign='center';g.font='bold 22px '+F;g.fillText("TAVOLA",0,-6);g.font='bold 34px '+F;g.fillText('✓',0,32);g.restore()}
+ pt.needsUpdate=true}
+/* post-it */
+const[ic,ig]=cvs(1024,1024),it=new THREE.CanvasTexture(ic),sm=new THREE.MeshStandardMaterial({color:0xe9d35a,roughness:.9});it.anisotropy=AN;
+const PI=new THREE.Mesh(new THREE.BoxGeometry(1.9,.02,1.9),[sm,sm,new THREE.MeshStandardMaterial({map:it,roughness:.9}),sm,sm,sm]);PI.position.set(-.6,.011,.9);PI.rotation.y=-.08;PI.castShadow=PI.receiveShadow=true;PI.userData.pi=true;S.add(PI);
+function drawPI(){const g=ig,H='"Trebuchet MS","Segoe UI",Arial,sans-serif';g.setTransform(2,0,0,2,0,0);g.fillStyle='#f6e36a';g.fillRect(0,0,512,512);g.fillStyle='rgba(0,0,0,.07)';g.fillRect(0,0,512,36);g.fillStyle='#1f1805';
+ if(flap){g.font='bold 40px '+H;g.fillText('Risposta',32,96);g.font='bold 34px '+H;wrap(g,'Stesso gruppo = stessi elettroni di valenza (qui 1): per questo le proprietà chimiche sono simili.',32,150,448,44)}
+ else{g.font='bold 66px '+H;g.fillText('Perché?',32,130);g.font='bold 34px '+H;wrap(g,'Prima fai la tua previsione, poi tocca il post-it.',32,200,448,44)}
+ it.needsUpdate=true}
+/* piastre Petri e campioni a inchiostro */
+const COR=0xd1495b,TEA=0x0f8b8d,AMB=0xe0a100,OL=new THREE.MeshBasicMaterial({color:0x14283c,side:THREE.BackSide}),G=[],E=[],PK=[],DM=[];
+const DX=[0],DZ=[0];
+function dish(x,z){const gm=new THREE.MeshPhysicalMaterial({color:0xe8f4f6,transparent:true,opacity:.3,roughness:.05,clearcoat:1,clearcoatRoughness:.05,side:THREE.DoubleSide,depthWrite:false}),T=(c,o,r)=>new THREE.MeshStandardMaterial({color:c,transparent:true,opacity:o,roughness:r});
+ const b=new THREE.Mesh(new THREE.CylinderGeometry(1.02,1.02,.035,64),gm),w=new THREE.Mesh(new THREE.CylinderGeometry(1.08,1.02,.18,64,1,true),gm),
+ a=new THREE.Mesh(new THREE.CylinderGeometry(.97,.97,.05,64),T(0xf0dfa0,.8,.4)),r=new THREE.Mesh(new THREE.TorusGeometry(1.08,.03,10,64),T(0xffffff,.6,.1)),m=new THREE.Mesh(new THREE.TorusGeometry(.97,.018,8,64),T(0xfff3c4,.9,.3)),
+ k=new THREE.Mesh(new THREE.RingGeometry(1.03,1.09,64),new THREE.MeshBasicMaterial({color:0x14283c,side:THREE.DoubleSide})),s=new THREE.Mesh(new THREE.CircleGeometry(1.3,48),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.22}));
+ b.position.set(x,.0175,z);w.position.set(x,.125,z);a.position.set(x,.06,z);r.position.set(x,.215,z);m.position.set(x,.085,z);k.position.set(x,.004,z);s.position.set(x,.002,z);
+ r.rotation.x=m.rotation.x=Math.PI/2;k.rotation.x=s.rotation.x=-Math.PI/2;b.receiveShadow=a.receiveShadow=true;
+ const o=[b,w,a,r,m];[s,k].concat(o).forEach(q=>S.add(q));return o}
+function tag(t,x,z){const[c,g]=cvs(512,192),p=t.split(' · ');g.fillStyle='#fbfaf6';g.fillRect(0,0,512,192);g.strokeStyle='#777';g.lineWidth=6;g.strokeRect(3,3,506,186);g.textAlign='center';
+ g.fillStyle=RED;g.font='bold 54px '+F;g.fillText(p[0],256,66);g.fillStyle=INK;let fs=76;g.font='bold '+fs+'px '+F;while(g.measureText(p[1]).width>470&&fs>28){fs-=2;g.font='bold '+fs+'px '+F}g.fillText(p[1],256,156);
+ const tx=new THREE.CanvasTexture(c);tx.anisotropy=AN;const m=new THREE.Mesh(new THREE.PlaneGeometry(2.2,.825),new THREE.MeshStandardMaterial({map:tx,roughness:.9}));m.rotation.x=-1;m.position.set(x,.26,z);m.castShadow=m.receiveShadow=true;S.add(m)}
+function tape(s,x,z,ang,col,w){w=w||1.5;const L=s.split('|'),n=L.length,hp=n===1?160:100+n*70,[c,g]=cvs(512,hp),H='"Segoe Print","Bradley Hand","Comic Sans MS","Trebuchet MS",cursive';
+ g.beginPath();g.moveTo(14,10);g.lineTo(498,10);for(let y=32,k=0;y<hp-12;y+=22,k++)g.lineTo(k%2?498:506,y);g.lineTo(498,hp-10);g.lineTo(14,hp-10);for(let y=hp-32,k=0;y>12;y-=22,k++)g.lineTo(k%2?14:6,y);g.closePath();
+ g.fillStyle=col;g.fill();g.save();g.clip();for(let i=0;i<900;i++){g.fillStyle='rgba('+(Math.random()<.5?'120,100,60':'255,255,255')+','+(.04+Math.random()*.08)+')';g.fillRect(Math.random()*512,Math.random()*hp,1+Math.random()*3,1)}
+ g.fillStyle='rgba(255,255,255,.18)';g.fillRect(0,18,512,22);g.restore();
+ g.textAlign='center';g.fillStyle='#18203a';L.forEach((t,i)=>{let fs=n===1?84:i?52:76;g.font='bold '+fs+'px '+H;while(g.measureText(t).width>410&&fs>24){fs-=2;g.font='bold '+fs+'px '+H}g.fillText(t,256,n===1?104:34+(hp-48)*(i+.78)/n)});
+ const tx=new THREE.CanvasTexture(c);tx.anisotropy=AN;const m=new THREE.Mesh(new THREE.PlaneGeometry(w,w*hp/512),new THREE.MeshStandardMaterial({map:tx,transparent:true,roughness:.95,depthWrite:false}));m.rotation.set(-Math.PI/2,0,ang||0);m.position.set(x,.01,z);m.receiveShadow=true;S.add(m)}
+function ball(r,c){const m=new THREE.Mesh(new THREE.SphereGeometry(r,24,16),new THREE.MeshToonMaterial({color:c}));m.castShadow=true;const o=new THREE.Mesh(m.geometry,OL);o.scale.setScalar(1.12);m.add(o);return m}
+function stick(a,b){const d=new THREE.Vector3().subVectors(b,a),m=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,d.length(),8),new THREE.MeshToonMaterial({color:0x55606b}));m.position.copy(a).addScaledVector(d,.5);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.clone().normalize());m.castShadow=true;return m}
+function grp(i,y){const g=new THREE.Group();g.position.set(DX[i],y,DZ[i]);g.userData={y:y,s:.9};g.scale.setScalar(.9);S.add(g);G.push(g);DM.push(dish(DX[i],DZ[i]));tape(['x'][i],DX[i],DZ[i],0,'rgba(0,0,0,0)');return g}
+const SYM="H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og".split(' ');
+const NOM="Idrogeno,Elio,Litio,Berillio,Boro,Carbonio,Azoto,Ossigeno,Fluoro,Neon,Sodio,Magnesio,Alluminio,Silicio,Fosforo,Zolfo,Cloro,Argon,Potassio,Calcio,Scandio,Titanio,Vanadio,Cromo,Manganese,Ferro,Cobalto,Nichel,Rame,Zinco,Gallio,Germanio,Arsenico,Selenio,Bromo,Kripton,Rubidio,Stronzio,Ittrio,Zirconio,Niobio,Molibdeno,Tecnezio,Rutenio,Rodio,Palladio,Argento,Cadmio,Indio,Stagno,Antimonio,Tellurio,Iodio,Xeno,Cesio,Bario,Lantanio,Cerio,Praseodimio,Neodimio,Promezio,Samario,Europio,Gadolinio,Terbio,Disprosio,Olmio,Erbio,Tulio,Itterbio,Lutezio,Afnio,Tantalio,Tungsteno,Renio,Osmio,Iridio,Platino,Oro,Mercurio,Tallio,Piombo,Bismuto,Polonio,Astato,Radon,Francio,Radio,Attinio,Torio,Protoattinio,Uranio,Nettunio,Plutonio,Americio,Curio,Berchelio,Californio,Einsteinio,Fermio,Mendelevio,Nobelio,Laurenzio,Rutherfordio,Dubnio,Seaborgio,Bohrio,Hassio,Meitnerio,Darmstadtio,Roentgenio,Copernicio,Nihonio,Flerovio,Moscovio,Livermorio,Tennesso,Oganesson".split(',');
+if(SYM.length!==118||NOM.length!==118)throw new Error('elenco elementi incompleto');
+const FN=['metalli alcalini','metalli alcalino-terrosi','metalli di transizione','metalli poveri','semimetalli','non metalli','alogeni','gas nobili','terre rare (lantanidi)','attinidi'];
+const FC=[0xf4a3b4,0xf5d36b,0xf0a15e,0xb4bfcc,0x5fc1b3,0xa8d98f,0x7fbdf0,0xc4a8ef,0xcf7fb0,0xb08a6a];
+const SEMI=[5,14,32,33,51,52],NONM=[1,6,7,8,15,16,34],POOR=[13,31,49,50,81,82,83,84,113,114,115,116];
+function famOf(z,g){if(z>=57&&z<=71)return 8;if(z>=89&&z<=103)return 9;if(SEMI.includes(z))return 4;if(NONM.includes(z))return 5;if(POOR.includes(z))return 3;if(g===18)return 7;if(g===17)return 6;if(g===1&&z>1)return 0;if(g===2)return 1;return 2}
+function posOf(z){if(z===1)return[1,1];if(z===2)return[18,1];if(z<=4)return[z-2,2];if(z<=10)return[z+8,2];if(z<=12)return[z-10,3];if(z<=18)return[z,3];if(z<=36)return[z-18,4];if(z<=54)return[z-36,5];if(z<=56)return[z-54,6];if(z<=71)return[0,6];if(z<=86)return[z-68,6];if(z<=88)return[z-86,7];if(z<=103)return[0,7];return[z-100,7]}
+const EL=SYM.map((sy,i)=>{const z=i+1,ps=posOf(z);return[sy,NOM[i],z,ps[0],ps[1],famOf(z,ps[0])]});
+CAP=EL.map(e=>{const g=e[3],f=e[5],m=g<=2?g:g-10,val=e[2]===2?'2 elettroni di valenza':(g===0||f===2)?'elettroni di valenza variabili':m+(m===1?' elettrone di valenza':' elettroni di valenza'),fam=f>=8?FN[f].replace(/^terre rare \(lantanidi\)$/,'terre rare: lantanidi'):FN[f];return[e[1]+' '+e[0]+' · Z = '+e[2],(g?'Gruppo '+g+' ('+fam+')':'Blocco f: '+fam)+' · periodo '+e[4]+' · '+val+' · '+e[4]+(e[4]===1?' guscio.':' gusci.')]});
+let MODE=0;const TL=[],LEG=[];
+const colOf=e=>MODE===0?FC[e[5]]:MODE===1?(e[3]?new THREE.Color().setHSL(((e[3]-1)*.055)%1,.6,.76):0xd7dce1):new THREE.Color().setHSL((e[4]-1)*.13,.6,.76);
+function tileTex(e){const[c,g]=cvs(128,128);g.fillStyle='#fff';g.fillRect(0,0,128,128);g.fillStyle='#14283c';g.textAlign='center';g.font='bold 62px '+F;g.fillText(e[0],64,78);g.font='bold 24px '+F;g.fillText(e[2],64,112);const t=new THREE.CanvasTexture(c);t.anisotropy=AN;return t}
+const X0=1.05,SP=.37,ZF=[2.64,3.01];
+EL.forEach((e,i)=>{const g=new THREE.Group(),col=e[3]?e[3]:(e[5]===8?e[2]-54:e[2]-86),x=X0+(col-1)*SP,z=e[3]?-.2+(e[4]-1)*SP:ZF[e[5]===8?0:1];g.position.set(x,.035,z);g.userData={y:.035,s:1};S.add(g);G.push(g);DM.push([]);
+ const sm=new THREE.MeshStandardMaterial({color:colOf(e),roughness:.8}),tm=new THREE.MeshStandardMaterial({color:colOf(e),map:tileTex(e),roughness:.8}),m=new THREE.Mesh(new THREE.BoxGeometry(.34,.07,.34),[sm,sm,tm,sm,sm,sm]);m.castShadow=m.receiveShadow=true;g.add(m);TL.push({g,sm,tm,e})});
+function plate(s,x,z,w){const[c,g]=cvs(96,96);g.fillStyle='#fbfaf6';g.fillRect(0,0,96,96);g.fillStyle='#14283c';g.textAlign='center';g.font='bold '+(s.length>2?26:s.length>1?44:52)+'px '+F;g.fillText(s,48,s.length>2?58:66);const m=new THREE.Mesh(new THREE.PlaneGeometry(.3,.3),new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(c),roughness:.9}));m.rotation.x=-Math.PI/2;m.position.set(x,.008,z);m.receiveShadow=true;S.add(m)}
+for(let c=1;c<=18;c++)plate(String(c),X0+(c-1)*SP,-.62);for(let p=1;p<=7;p++)plate(String(p),X0-.5,-.2+(p-1)*SP);
+/* segnaposto dei blocchi f (non cliccabili) */
+[[6,'57-71',8],[7,'89-103',9]].forEach(q=>{const[c,g]=cvs(128,128);g.fillStyle='#'+FC[q[2]].toString(16).padStart(6,'0');g.fillRect(0,0,128,128);g.fillStyle='#14283c';g.textAlign='center';g.font='bold 30px '+F;g.fillText(q[1],64,74);const m=new THREE.Mesh(new THREE.BoxGeometry(.34,.04,.34),[1,2,3,4,5,6].map((k)=>new THREE.MeshStandardMaterial(k===3?{map:new THREE.CanvasTexture(c),roughness:.8}:{color:FC[q[2]],roughness:.8})));m.position.set(X0+2*SP,.02,-.2+(q[0]-1)*SP);m.receiveShadow=true;S.add(m)});
+const LGD=[['Alcalini',0],['Alcalino-terrosi',1],['Metalli di|transizione',2],['Metalli|poveri',3],['Semimetalli',4],['Non metalli',5],['Alogeni',6],['Gas nobili',7],['Terre rare|(lantanidi)',8],['Attinidi',9]];
+LGD.forEach((q,i)=>{const n=S.children.length,r=i<5?0:1,k=i%5;tape(q[0],1.4+k*1.55,r?4.75:3.95,[-.03,.03,-.02,.04,-.03][k],'#'+FC[q[1]].toString(16).padStart(6,'0'),1.45);LEG.push(S.children[n])});
+const mbt=[['m1',0],['m2',1],['m3',2]];
+function setMode(m){MODE=m;TL.forEach(t=>{const c=colOf(t.e);t.sm.color.set(c);t.tm.color.set(c)});LEG.forEach(l=>l.visible=m===0);mbt.forEach(b=>{$('#'+b[0]).style.borderWidth=b[1]===m?'4px':'1.5px'})}
+mbt.forEach(b=>$('#'+b[0]).onclick=()=>setMode(b[1]));setMode(0);
+function simStep(dt,t){TL.forEach((q,i)=>{let h=false;if(sel>=0){const s=EL[sel],e=q.e;h=MODE===0?e[5]===s[5]:MODE===1?e[3]===s[3]:e[4]===s[4]}const y=.035+(h?.14:0)+(i===sel?.06:0);q.g.position.y+=(y-q.g.position.y)*.15})}
+G.forEach((gr,i)=>{gr.traverse(o=>{if(o.isMesh){o.userData.gi=i;PK.push(o)}});DM[i].forEach(o=>{o.userData.gi=i;PK.push(o)})});
+/* camera e interazione */
+let yaw=0,pit=1.1,zm=1,focus=0,fz=0;const TA=new THREE.Vector3(.65,.3,1.9),TP=new THREE.Vector3(-3.9,.3,.4);
+function cam(){const a=innerWidth/innerHeight,d1=Math.max(13.5,7.3/(.364*a)),d2=1.12*Math.max(3.3/.364,2.5/(.364*a));fz+=(focus-fz)*.08;const d=(d1+(d2-d1)*fz)*zm,t=TA.clone().lerp(TP,fz);C.position.set(t.x+d*Math.sin(yaw)*Math.cos(pit),t.y+d*Math.sin(pit),t.z+d*Math.cos(yaw)*Math.cos(pit));C.lookAt(t)}
+$('#fc').onclick=()=>{focus=focus?0:1;$('#fc').textContent=focus?'Vista d’insieme':'Leggi il foglio'};
+function rs(){R.setSize(innerWidth,innerHeight);C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix()}
+function upd(){$('#pr').textContent=vis.size+'/10 famiglie'+(flap?' · post-it aperto':'');drawP();drawPI()}
+const RC=new THREE.Raycaster();
+function pick(e){RC.setFromCamera(new THREE.Vector2(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1),C);const h=RC.intersectObjects(PK.concat([PI]),false)[0];if(!h)return;
+ if(h.object.userData.gi!==undefined){sel=h.object.userData.gi;vis.add(EL[sel][5])}else if(h.object.userData.pi)flap=!flap;
+ upd()}
+let dn=null,dr=false;const el=R.domElement;
+el.addEventListener('pointerdown',e=>{dn={x:e.clientX,y:e.clientY};dr=false;el.setPointerCapture(e.pointerId)});
+el.addEventListener('pointermove',e=>{if(!dn)return;const dx=e.clientX-dn.x,dy=e.clientY-dn.y;if(!dr&&Math.hypot(dx,dy)>6)dr=true;if(dr){yaw=Math.max(-.7,Math.min(.7,yaw-dx*.005));pit=Math.max(.6,Math.min(1.4,pit+dy*.004));dn={x:e.clientX,y:e.clientY}}});
+el.addEventListener('pointerup',e=>{if(dn&&!dr)pick(e);dn=null});
+el.addEventListener('pointercancel',()=>{dn=null});
+el.addEventListener('wheel',e=>{e.preventDefault();zm=Math.max(.45,Math.min(1.5,zm*(e.deltaY>0?1.08:.92)))},{passive:false});
+$('#rs').onclick=()=>{yaw=0;pit=1.1;zm=1;focus=0;$('#fc').textContent='Leggi il foglio'};
+function frame(t){requestAnimationFrame(frame);t*=.001;
+ const dt=Math.min(.05,t-(frame.p||t));frame.p=t;simStep(dt,t);
+ 
+ PI.position.y+=((flap?.3:.011)-PI.position.y)*.15;PI.rotation.x+=((flap?-.15:0)-PI.rotation.x)*.15;
+ cam();R.render(S,C)}
+drawP();drawPI();rs();addEventListener('resize',rs);requestAnimationFrame(frame);
+})();
+</script>
+</body></html>

@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bancone · 3.2 Gli esperimenti</title>
+<style>
+:root{--bg:#69737a;--bar:rgba(247,246,241,.94);--ink:#14283c;--ac:#0f8b8d;color-scheme:light dark;box-sizing:border-box}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bar:rgba(22,38,54,.94);--ink:#e6eef5;--ac:#3cc4c6}}
+:root[data-theme="dark"]{--bar:rgba(22,38,54,.94);--ink:#e6eef5;--ac:#3cc4c6}
+html,body{height:100%;margin:0;background:var(--bg);overflow:hidden;font:15px/1.4 "Avenir Next","Segoe UI",system-ui,sans-serif;color:var(--ink)}
+canvas{display:block;touch-action:none}
+#bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;padding:8px 12px;border-radius:24px;background:var(--bar);box-shadow:0 4px 18px #0006;max-width:calc(100% - 20px)}
+#bar button,#bar a{font:inherit;color:var(--ink);background:transparent;border:1.5px solid var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer;text-decoration:none;white-space:nowrap}
+#top{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:12px;right:12px;text-align:center;pointer-events:none}
+#top span{display:inline-block;background:var(--bar);padding:6px 14px;border-radius:999px}
+#msg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff}
+#msg a{color:#9fe}
+button:focus-visible,a:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+</style></head>
+<body>
+<div id="top"><span>Tocca gli apparecchi · prova il campo elettrico · tocca il post-it per la risposta · trascina per girare la vista</span></div>
+<div id="msg"><p>Questo prototipo richiede la grafica 3D (WebGL), che qui non è disponibile.<br>Usa la <a href="versione-semplice.html">versione semplice</a>.</p></div>
+<div id="bar"><b>Lezione 3.2 · Gli esperimenti</b><button id="fe">Campo elettrico: OFF</button><span id="rd"></span><span id="pr">0/2 esperimenti</span><button id="fc">Leggi il foglio</button><button id="rs">Ripristina vista</button><a href="index.html">← Mappa</a><a href="versione-semplice.html">Versione semplice</a></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+let R;try{if(typeof THREE==='undefined')throw 0;R=new THREE.WebGLRenderer({antialias:true})}catch(e){$('#msg').style.display='flex';$('#bar').style.display='none';$('#top').style.display='none';return}
+R.setPixelRatio(Math.min(devicePixelRatio||1,2));R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;document.body.appendChild(R.domElement);
+const AN=R.capabilities&&R.capabilities.getMaxAnisotropy?R.capabilities.getMaxAnisotropy():8;
+const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(40,1,.1,100);S.background=new THREE.Color(0x69737a);
+S.add(new THREE.AmbientLight(0xffffff,.75));
+const L=new THREE.DirectionalLight(0xffffff,.85);L.position.set(-5,9,6);L.castShadow=true;L.shadow.mapSize.set(2048,2048);Object.assign(L.shadow.camera,{left:-11,right:11,top:10,bottom:-10,near:1,far:30});S.add(L);
+const L2=new THREE.DirectionalLight(0xffffff,.4);L2.position.set(5,4,9);S.add(L2);
+function cvs(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return[c,c.getContext('2d')]}
+const F='Georgia,"Times New Roman",serif',INK='#0e141b',RED='#8b1e2d';
+/* ripiano grigio scuro */
+const[bc,bg]=cvs(512,512);bg.fillStyle='#8a9298';bg.fillRect(0,0,512,512);
+for(let i=0;i<2400;i++){bg.fillStyle='rgba('+(Math.random()<.5?'40,48,54':'255,255,255')+','+(.04+Math.random()*.08)+')';bg.fillRect(Math.random()*512,Math.random()*512,1+Math.random()*2,1+Math.random()*2)}
+const bt=new THREE.CanvasTexture(bc);bt.wrapS=bt.wrapT=THREE.RepeatWrapping;bt.repeat.set(5,3.5);bt.anisotropy=AN;
+const bench=new THREE.Mesh(new THREE.PlaneGeometry(40,28),new THREE.MeshStandardMaterial({map:bt,roughness:.75}));bench.rotation.x=-Math.PI/2;bench.receiveShadow=true;S.add(bench);
+function wrap(g,t,x,y,w,lh){let l='';t.split(' ').forEach(p=>{const m=l?l+' '+p:p;if(g.measureText(m).width>w&&l){g.fillText(l,x,y);y+=lh;l=p}else l=m});g.fillText(l,x,y);return y+lh}
+/* foglio di carta (testo ad alta risoluzione) */
+const[pc,pg]=cvs(1760,2448),pt=new THREE.CanvasTexture(pc);pt.anisotropy=AN;
+const PP=new THREE.Group();PP.position.set(-3.9,0,.4);PP.rotation.y=.04;S.add(PP);
+const sh=new THREE.Mesh(new THREE.BoxGeometry(4.6,.03,6.4),new THREE.MeshStandardMaterial({color:0xe8e6df}));sh.position.y=.015;sh.castShadow=sh.receiveShadow=true;PP.add(sh);
+const pl=new THREE.Mesh(new THREE.PlaneGeometry(4.6,6.4),new THREE.MeshStandardMaterial({map:pt,roughness:.9}));pl.rotation.x=-Math.PI/2;pl.position.y=.031;pl.receiveShadow=true;PP.add(pl);
+let flap=false,sel=-1;const vis=new Set();
+const CAP=[["Thomson · tubo a raggi catodici", "Il fascio negativo è attratto dalla placca positiva: sono elettroni, parti di ogni atomo. Modello a panettone (1904)."], ["Rutherford · lamina d’oro", "Pochi rimbalzi: la carica positiva è concentrata in un nucleo minuscolo. Modello nucleare (1911). Nella simulazione le deviazioni sono esagerate."]],LB=["A", "B"];
+function drawP(k){k=k||1;const g=pg,f=n=>Math.round(n*k),lh=f(27);g.setTransform(2,0,0,2,0,0);g.fillStyle='#fbfaf6';g.fillRect(0,0,880,1224);
+ const cnt=(t,w)=>{let l='',n=1;t.split(' ').forEach(p=>{const m=l?l+' '+p:p;if(g.measureText(m).width>w&&l){n++;l=p}else l=m});return n};
+ g.fillStyle=RED;g.font='600 20px '+F;g.fillText('LEZIONE 3.2 · GLI ESPERIMENTI',70,84);
+ g.fillStyle=INK;g.font='bold 54px '+F;g.fillText('Thomson e Rutherford',70,146);
+ g.fillStyle=RED;g.font='600 18px '+F;g.fillText('PREVEDI',70,186);g.fillStyle=INK;g.font=f(24)+'px '+F;wrap(g,'Perché il modello di Thomson non riesce a spiegare i rimbalzi osservati da Rutherford?',70,214,740,30);
+ const cx=[70,455],cw=355;
+ if(sel>=0){g.fillStyle='rgba(224,161,0,.16)';g.fillRect(cx[sel]-10,262,cw+20,720)}
+ g.font='bold '+f(24)+'px '+F;g.fillStyle=INK;g.fillText('THOMSON · 1897',cx[0],290);g.fillText('RUTHERFORD · 1909–11',cx[1],290);
+ const R=[['MATERIALE','Tubo di vetro con gas rarefatto, due elettrodi, due placche cariche e uno schermo fluorescente.','Sorgente di particelle α (positive), lamina d’oro sottilissima e schermo fluorescente che emette scintille.'],
+ ['PROCEDURA','Alta tensione tra gli elettrodi: compare un fascio (raggi catodici). Si caricano le placche e si osserva il fascio.','Il fascio di particelle α colpisce la lamina. Si contano le scintille sullo schermo, a diversi angoli.'],
+ ['RISULTATI','Il fascio viene deviato verso la placca positiva, con qualunque gas o metallo.','Quasi tutte passano dritte, alcune sono deviate, pochissime (circa 1 su 8000) tornano indietro.'],
+ ['DEDUZIONE','Particelle negative (elettroni) in tutti gli atomi. L’atomo è neutro: carica positiva diffusa. Modello a panettone.','Atomo quasi vuoto, con un nucleo piccolo, denso e positivo; elettroni intorno. Modello nucleare.']];
+ let y=326;R.forEach(r=>{g.fillStyle=RED;g.font='600 '+f(17)+'px '+F;g.fillText(r[0],70,y);y+=f(26);g.fillStyle=INK;g.font=f(23)+'px '+F;const n=Math.max(cnt(r[1],cw),cnt(r[2],cw));wrap(g,r[1],cx[0],y,cw,lh);wrap(g,r[2],cx[1],y,cw,lh);y+=n*lh+f(20)});
+ if(y>990&&k>.6){drawP(k*.94);return}
+ g.strokeStyle='#b8b5ac';g.lineWidth=2;g.beginPath();g.moveTo(70,1010);g.lineTo(810,1010);g.stroke();
+ g.fillStyle=RED;g.font='600 20px '+F;g.fillText('ESPERIMENTO',70,1048);g.fillStyle=INK;
+ if(sel<0){g.font='italic 28px '+F;wrap(g,'Tocca un apparecchio sul bancone.',70,1094,740,36)}
+ else{g.font='bold 30px '+F;g.fillText(CAP[sel][0],70,1092);g.font='26px '+F;wrap(g,CAP[sel][1],70,1130,740,33)}
+ if(vis.size===2&&flap){g.save();g.translate(730,100);g.rotate(-.25);g.strokeStyle=g.fillStyle='rgba(181,72,58,.88)';g.lineWidth=5;g.beginPath();g.arc(0,0,64,0,7);g.stroke();g.lineWidth=2;g.beginPath();g.arc(0,0,54,0,7);g.stroke();g.textAlign='center';g.font='bold 20px '+F;g.fillText('ESPERIMENTI',0,-6);g.font='bold 34px '+F;g.fillText('✓',0,32);g.restore()}
+ pt.needsUpdate=true}
+/* post-it */
+const[ic,ig]=cvs(1024,1024),it=new THREE.CanvasTexture(ic),sm=new THREE.MeshStandardMaterial({color:0xe9d35a,roughness:.9});it.anisotropy=AN;
+const PI=new THREE.Mesh(new THREE.BoxGeometry(1.9,.02,1.9),[sm,sm,new THREE.MeshStandardMaterial({map:it,roughness:.9}),sm,sm,sm]);PI.position.set(-.6,.011,.9);PI.rotation.y=-.08;PI.castShadow=PI.receiveShadow=true;PI.userData.pi=true;S.add(PI);
+function drawPI(){const g=ig,H='"Trebuchet MS","Segoe UI",Arial,sans-serif';g.setTransform(2,0,0,2,0,0);g.fillStyle='#f6e36a';g.fillRect(0,0,512,512);g.fillStyle='rgba(0,0,0,.07)';g.fillRect(0,0,512,36);g.fillStyle='#1f1805';
+ if(flap){g.font='bold 40px '+H;g.fillText('Risposta',32,96);g.font='bold 34px '+H;wrap(g,'Con carica positiva diffusa le α passerebbero quasi tutte. I rimbalzi indicano un nucleo piccolo e denso.',32,150,448,44)}
+ else{g.font='bold 66px '+H;g.fillText('Perché?',32,130);g.font='bold 34px '+H;wrap(g,'Prima fai la tua previsione, poi tocca il post-it.',32,200,448,44)}
+ it.needsUpdate=true}
+/* piastre Petri e campioni a inchiostro */
+const COR=0xd1495b,TEA=0x0f8b8d,AMB=0xe0a100,OL=new THREE.MeshBasicMaterial({color:0x14283c,side:THREE.BackSide}),G=[],E=[],PK=[],DM=[];
+const DX=[1.4],DZ=[.5];
+function dish(x,z){const gm=new THREE.MeshPhysicalMaterial({color:0xe8f4f6,transparent:true,opacity:.3,roughness:.05,clearcoat:1,clearcoatRoughness:.05,side:THREE.DoubleSide,depthWrite:false}),T=(c,o,r)=>new THREE.MeshStandardMaterial({color:c,transparent:true,opacity:o,roughness:r});
+ const b=new THREE.Mesh(new THREE.CylinderGeometry(1.02,1.02,.035,64),gm),w=new THREE.Mesh(new THREE.CylinderGeometry(1.08,1.02,.18,64,1,true),gm),
+ a=new THREE.Mesh(new THREE.CylinderGeometry(.97,.97,.05,64),T(0xf0dfa0,.8,.4)),r=new THREE.Mesh(new THREE.TorusGeometry(1.08,.03,10,64),T(0xffffff,.6,.1)),m=new THREE.Mesh(new THREE.TorusGeometry(.97,.018,8,64),T(0xfff3c4,.9,.3)),
+ k=new THREE.Mesh(new THREE.RingGeometry(1.03,1.09,64),new THREE.MeshBasicMaterial({color:0x14283c,side:THREE.DoubleSide})),s=new THREE.Mesh(new THREE.CircleGeometry(1.3,48),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.22}));
+ b.position.set(x,.0175,z);w.position.set(x,.125,z);a.position.set(x,.06,z);r.position.set(x,.215,z);m.position.set(x,.085,z);k.position.set(x,.004,z);s.position.set(x,.002,z);
+ r.rotation.x=m.rotation.x=Math.PI/2;k.rotation.x=s.rotation.x=-Math.PI/2;b.receiveShadow=a.receiveShadow=true;
+ const o=[b,w,a,r,m];[s,k].concat(o).forEach(q=>S.add(q));return o}
+function tag(t,x,z,w){w=w||2.2;const[c,g]=cvs(512,192),p=t.split('|');g.fillStyle='#fbfaf6';g.fillRect(0,0,512,192);g.strokeStyle='#777';g.lineWidth=6;g.strokeRect(3,3,506,186);g.textAlign='center';g.fillStyle=INK;
+ const fit=(s,fs,mn)=>{g.font='bold '+fs+'px '+F;while(g.measureText(s).width>470&&fs>mn){fs-=2;g.font='bold '+fs+'px '+F}};
+ if(p[1]){fit(p[0],70,30);g.fillText(p[0],256,82);g.fillStyle=RED;fit(p[1],44,22);g.fillText(p[1],256,150)}else{fit(p[0],84,30);g.fillText(p[0],256,118)}
+ const tx=new THREE.CanvasTexture(c);tx.anisotropy=AN;const m=new THREE.Mesh(new THREE.PlaneGeometry(w,w*.375),new THREE.MeshStandardMaterial({map:tx,roughness:.9}));m.rotation.x=-1;m.position.set(x,.26,z);m.castShadow=m.receiveShadow=true;S.add(m)}
+function note(L,x,z,col,w,h,ry){const px=512,py=Math.round(512*h/w),[c,g]=cvs(px,py),H='"Trebuchet MS","Segoe UI",Arial,sans-serif';g.fillStyle=col;g.fillRect(0,0,px,py);g.fillStyle='rgba(0,0,0,.07)';g.fillRect(0,0,px,34);g.textAlign='center';g.fillStyle='#1f1805';
+ const n=L.length,top=56,gap=(py-top-26)/n;L.forEach((s,i)=>{let fs=i?54:76;g.font='bold '+fs+'px '+H;while(g.measureText(s).width>466&&fs>22){fs-=2;g.font='bold '+fs+'px '+H}g.fillText(s,px/2,top+gap*(i+.78))});
+ const tx=new THREE.CanvasTexture(c);tx.anisotropy=AN;const sm=new THREE.MeshStandardMaterial({color:new THREE.Color(col),roughness:.9}),m=new THREE.Mesh(new THREE.BoxGeometry(w,.02,h),[sm,sm,new THREE.MeshStandardMaterial({map:tx,roughness:.9}),sm,sm,sm]);m.position.set(x,.011,z);m.rotation.y=ry||0;m.castShadow=m.receiveShadow=true;S.add(m)}
+function ball(r,c){const m=new THREE.Mesh(new THREE.SphereGeometry(r,24,16),new THREE.MeshToonMaterial({color:c}));m.castShadow=true;const o=new THREE.Mesh(m.geometry,OL);o.scale.setScalar(1.12);m.add(o);return m}
+function stick(a,b){const d=new THREE.Vector3().subVectors(b,a),m=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,d.length(),8),new THREE.MeshToonMaterial({color:0x55606b}));m.position.copy(a).addScaledVector(d,.5);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.clone().normalize());m.castShadow=true;return m}
+function grp(i,y){const g=new THREE.Group();g.position.set(DX[i],y,DZ[i]);g.userData={y:y,s:.9};g.scale.setScalar(.9);S.add(g);G.push(g);DM.push(dish(DX[i],DZ[i]));tag('A · x',DX[i],DZ[i]+1.4);return g}
+function spr(t,x,y,z,w){w=w||.8;const[c,g]=cvs(256,96);g.fillStyle='rgba(255,255,255,.9)';g.fillRect(2,2,252,92);g.fillStyle='#14283c';g.textAlign='center';let fs=64;g.font='bold '+fs+'px '+F;while(g.measureText(t).width>236&&fs>20){fs-=2;g.font='bold '+fs+'px '+F}g.fillText(t,128,68);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));s.scale.set(w,w*.375,1);s.position.set(x,y,z||0);return s}
+function grp2(x,z){const g=new THREE.Group();g.position.set(x,0,z);g.userData={y:0,s:1,c:new THREE.Group()};S.add(g);G.push(g);DM.push([]);return g}
+let sd=5;const rnd=()=>(sd=(sd*16807)%2147483647)/2147483647;
+const GL=new THREE.MeshPhysicalMaterial({color:0xe8f4f6,transparent:true,opacity:.28,roughness:.05,clearcoat:1,clearcoatRoughness:.05,side:THREE.DoubleSide,depthWrite:false}),STL=new THREE.MeshStandardMaterial({color:0x9aa3aa,metalness:.5,roughness:.4}),DK=new THREE.MeshStandardMaterial({color:0x3a4046,roughness:.6});
+let FE=false,TH=null;const AL=[],SP=[],tally=[0,0,0];let nxt=0;
+let g=grp2(3,-2.1);{const tb=new THREE.Mesh(new THREE.CylinderGeometry(.4,.4,3.9,32,1,true),GL);tb.rotation.z=Math.PI/2;tb.position.y=.8;g.add(tb);
+ [-1,1].forEach(s=>{const cp=new THREE.Mesh(new THREE.CircleGeometry(.4,32),GL);cp.rotation.y=s*Math.PI/2;cp.position.set(s*1.95,.8,0);g.add(cp)});
+ [-1.2,1.2].forEach(x=>{const st=new THREE.Mesh(new THREE.BoxGeometry(.3,.4,.8),STL);st.position.set(x,.2,0);st.castShadow=true;g.add(st)});
+ const cat=new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,.2,16),DK);cat.rotation.z=Math.PI/2;cat.position.set(-1.75,.8,0);g.add(cat);
+ const an=new THREE.Mesh(new THREE.TorusGeometry(.26,.04,8,24),STL);an.rotation.y=Math.PI/2;an.position.set(-1.1,.8,0);g.add(an);
+ const pl=[1,-1].map(sg=>{const m=new THREE.Mesh(new THREE.BoxGeometry(.9,.04,.5),new THREE.MeshStandardMaterial({color:0x888888,emissive:0x000000}));m.position.set(.65,.8+sg*.27,0);g.add(m);return m});
+ const scr=new THREE.Mesh(new THREE.CircleGeometry(.38,32),new THREE.MeshStandardMaterial({color:0x2d5a3a,emissive:0x2dff7a,emissiveIntensity:.35}));scr.rotation.y=-Math.PI/2;scr.position.set(1.9,.8,0);g.add(scr);
+ const spot=new THREE.Mesh(new THREE.SphereGeometry(.07,12,8),new THREE.MeshBasicMaterial({color:0xe6ffee}));g.add(spot);
+ 
+ const sg=[spr('+',.65,1.55,0,.45),spr('−',.65,.05,0,.45)];sg.forEach(s=>{s.visible=false;g.add(s)});
+ const E2=[];for(let i=0;i<24;i++){const e=ball(.045,TEA);g.add(e);E2.push(e)}TH={pl,sg,E2,spot}}
+note(['Thomson','tubo a raggi catodici','placche cariche','schermo fluorescente'],6.25,-2.1,'#ffe58a',1.95,1.6,-.04);
+g=grp2(3.3,1.2);{const foil=new THREE.Mesh(new THREE.BoxGeometry(.03,.8,1.1),new THREE.MeshStandardMaterial({color:0xe0b43a,metalness:.7,roughness:.3}));foil.position.y=.45;foil.castShadow=true;g.add(foil);
+ const rg=new THREE.Group();rg.rotation.x=-Math.PI/2;rg.position.y=.2;g.add(rg);
+ const ar=new THREE.Mesh(new THREE.TorusGeometry(1.7,.09,8,72,Math.PI*2-.5),new THREE.MeshStandardMaterial({color:0x2d5a3a,emissive:0x2dff7a,emissiveIntensity:.25,roughness:.5}));ar.rotation.z=Math.PI+.25;rg.add(ar);
+ const sb=new THREE.Mesh(new THREE.BoxGeometry(.7,.5,.5),DK);sb.position.set(-2.55,.3,0);sb.castShadow=true;g.add(sb);
+ 
+ for(let i=0;i<50;i++){const a=ball(.065,COR);a.visible=false;g.add(a);AL.push({m:a,on:false,x:0,z:0,vx:0,vz:0,dec:false,k:0})}
+ for(let i=0;i<40;i++){const s=new THREE.Mesh(new THREE.SphereGeometry(.07,10,8),new THREE.MeshBasicMaterial({color:0xbfffd0,transparent:true}));s.visible=false;g.add(s);SP.push({m:s,t:0})}
+ TH.R=g}
+note(['Rutherford','sorgente di particelle α','lamina d’oro','schermo fluorescente'],6.25,1.2,'#ffb3c1',1.95,1.6,.05);
+const dyy=x=>{if(!FE)return 0;const a=.12,x0=.2,x1=1.1;if(x<x0)return 0;if(x<=x1)return a*(x-x0)*(x-x0);return a*.81+2*a*.9*(x-x1)};
+function simStep(dt,t){TH.E2.forEach((e,i)=>{const x=-1.7+((t*1.4+i/24)%1)*3.6;e.position.set(x,.8+dyy(x),0)});TH.spot.position.set(1.86,.8+dyy(1.86),0);
+ TH.pl.forEach((p,i)=>{p.material.emissive.setHex(FE?(i?0x2d7be0:0xd1495b):0);p.material.emissiveIntensity=FE?.6:0});TH.sg.forEach(s=>s.visible=FE);
+ nxt-=dt;if(nxt<=0){nxt=.09;const p=AL.find(q=>!q.on);if(p){p.on=true;p.dec=false;p.x=-2.2;p.z=(rnd()-.5)*.36;p.vx=2.6;p.vz=0;p.m.visible=true}}
+ AL.forEach(p=>{if(!p.on)return;p.x+=p.vx*dt;p.z+=p.vz*dt;
+  if(!p.dec&&p.x>=0){p.dec=true;const r=rnd();let an;if(r<.965){an=(rnd()-.5)*.1;p.k=0}else if(r<.995){an=(rnd()<.5?-1:1)*(.3+rnd()*.9);p.k=1}else{an=Math.PI+(rnd()<.5?-1:1)*(.3+rnd()*.5);p.k=2}p.vx=2.6*Math.cos(an);p.vz=2.6*Math.sin(an)}
+  p.m.position.set(p.x,.25,p.z);
+  if(p.dec&&Math.hypot(p.x,p.z)>=1.7){tally[p.k]++;const s=SP.find(q=>q.t<=0);if(s){const h=Math.hypot(p.x,p.z);s.m.position.set(p.x/h*1.7,.25,p.z/h*1.7);s.m.material.color.setHex([0xbfffd0,0xe0a100,0xd1495b][p.k]);s.t=1;s.m.visible=true}p.on=false;p.m.visible=false}});
+ SP.forEach(s=>{if(s.t>0){s.t-=dt*.7;s.m.material.opacity=Math.max(0,s.t);if(s.t<=0)s.m.visible=false}});
+ $('#rd').textContent='α: passate '+tally[0]+' · deviate '+tally[1]+' · tornate indietro '+tally[2]}
+$('#fe').onclick=()=>{FE=!FE;$('#fe').textContent='Campo elettrico: '+(FE?'ON':'OFF')};
+G.forEach((gr,i)=>{gr.traverse(o=>{if(o.isMesh){o.userData.gi=i;PK.push(o)}});DM[i].forEach(o=>{o.userData.gi=i;PK.push(o)})});
+/* camera e interazione */
+let yaw=0,pit=1.1,zm=1,focus=0,fz=0;const TA=new THREE.Vector3(.4,.3,.5),TP=new THREE.Vector3(-3.9,.3,.4);
+function cam(){const a=innerWidth/innerHeight,d1=Math.max(10,6.9/(.364*a)),d2=1.12*Math.max(3.3/.364,2.5/(.364*a));fz+=(focus-fz)*.08;const d=(d1+(d2-d1)*fz)*zm,t=TA.clone().lerp(TP,fz);C.position.set(t.x+d*Math.sin(yaw)*Math.cos(pit),t.y+d*Math.sin(pit),t.z+d*Math.cos(yaw)*Math.cos(pit));C.lookAt(t)}
+$('#fc').onclick=()=>{focus=focus?0:1;$('#fc').textContent=focus?'Vista d’insieme':'Leggi il foglio'};
+function rs(){R.setSize(innerWidth,innerHeight);C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix()}
+function upd(){$('#pr').textContent=vis.size+'/2 esperimenti'+(flap?' · post-it aperto':'');drawP();drawPI()}
+const RC=new THREE.Raycaster();
+function pick(e){RC.setFromCamera(new THREE.Vector2(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1),C);const h=RC.intersectObjects(PK.concat([PI]),false)[0];if(!h)return;
+ if(h.object.userData.gi!==undefined){sel=h.object.userData.gi;vis.add(sel)}else if(h.object.userData.pi)flap=!flap;
+ upd()}
+let dn=null,dr=false;const el=R.domElement;
+el.addEventListener('pointerdown',e=>{dn={x:e.clientX,y:e.clientY};dr=false;el.setPointerCapture(e.pointerId)});
+el.addEventListener('pointermove',e=>{if(!dn)return;const dx=e.clientX-dn.x,dy=e.clientY-dn.y;if(!dr&&Math.hypot(dx,dy)>6)dr=true;if(dr){yaw=Math.max(-.7,Math.min(.7,yaw-dx*.005));pit=Math.max(.6,Math.min(1.4,pit+dy*.004));dn={x:e.clientX,y:e.clientY}}});
+el.addEventListener('pointerup',e=>{if(dn&&!dr)pick(e);dn=null});
+el.addEventListener('pointercancel',()=>{dn=null});
+el.addEventListener('wheel',e=>{e.preventDefault();zm=Math.max(.45,Math.min(1.5,zm*(e.deltaY>0?1.08:.92)))},{passive:false});
+$('#rs').onclick=()=>{yaw=0;pit=1.1;zm=1;focus=0;$('#fc').textContent='Leggi il foglio'};
+function frame(t){requestAnimationFrame(frame);t*=.001;
+ const dt=Math.min(.05,t-(frame.p||t));frame.p=t;simStep(dt,t);G.forEach((o,i)=>{const s=i===sel;if(o.userData.c)return;const k=(s?1.3:1)*o.userData.s;o.rotation.y=t*(s?1.2:.3);o.scale.x+=(k-o.scale.x)*.12;o.scale.y=o.scale.z=o.scale.x;o.position.y=o.userData.y+(s?.2:0)+Math.sin(t*1.5)*.02});
+ 
+ PI.position.y+=((flap?.3:.011)-PI.position.y)*.15;PI.rotation.x+=((flap?-.15:0)-PI.rotation.x)*.15;
+ cam();R.render(S,C)}
+drawP();drawPI();rs();addEventListener('resize',rs);requestAnimationFrame(frame);
+})();
+</script>
+</body></html>
