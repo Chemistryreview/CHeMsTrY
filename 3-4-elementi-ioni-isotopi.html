@@ -125,11 +125,12 @@ const FREE=mkE(.075,AMB);{const h=new THREE.Mesh(new THREE.RingGeometry(.09,.12,
 const TC=['rgba(190,235,170,.96)','rgba(255,179,193,.96)','rgba(190,235,170,.96)','rgba(170,215,250,.96)','rgba(242,212,138,.96)','rgba(242,212,138,.96)','rgba(242,212,138,.96)'];
 [['Sodio|Na',1.5,-2.7],['Sodio|Na⁺ · catione',3.5,-2.7],['Cloro|Cl',1.5,0],['Cloro|Cl⁻ · anione',3.5,0],['Protio|¹₁H',1.5,2.7],['Deuterio|²₁H',3.5,2.7],['Trizio|³₁H',5.5,2.7]].forEach((q,i)=>tape(q[0],q[1],q[2]+1.27,[-.05,.04,-.03,.05,-.04,.03,-.05][i],TC[i]));
 tape('elettrone perso',4.95,-2.15,.03,'rgba(242,212,138,.96)',1.5);
+tape('Catione|ha perso elettroni|carica positiva (+)',8.0,-2.7,.02,'rgba(255,179,193,.96)',2.5);tape('Anione|ha acquistato elettroni|carica negativa (−)',8.0,0,-.02,'rgba(170,215,250,.96)',2.5);tape('Isotopi|stesso elemento (stesso Z)|neutroni diversi',8.2,2.7,.02,'rgba(242,212,138,.96)',2.5);
 function simStep(dt,t){ATM.forEach(rs=>rs.forEach((rg,k)=>{rg.rotation.y=t*(k%2?-1:1)*(.5-.12*k)}));FREE.position.set(1.45+Math.sin(t*1.6)*.1,Math.sin(t*3)*.03,Math.cos(t*1.3)*.08)}
 G.forEach((gr,i)=>{gr.traverse(o=>{if(o.isMesh){o.userData.gi=i;PK.push(o)}});DM[i].forEach(o=>{o.userData.gi=i;PK.push(o)})});
 /* camera e interazione */
-let yaw=0,pit=1.1,zm=1,focus=0,fz=0;const TA=new THREE.Vector3(.1,.3,1.7),TP=new THREE.Vector3(-3.9,.3,.4);
-function cam(){const a=innerWidth/innerHeight,d1=Math.max(13.6,7.4/(.364*a)),d2=1.12*Math.max(3.3/.364,2.5/(.364*a));fz+=(focus-fz)*.08;const d=(d1+(d2-d1)*fz)*zm,t=TA.clone().lerp(TP,fz);C.position.set(t.x+d*Math.sin(yaw)*Math.cos(pit),t.y+d*Math.sin(pit),t.z+d*Math.cos(yaw)*Math.cos(pit));C.lookAt(t)}
+let yaw=0,pit=1.1,zm=1,focus=0,fz=0;const TA=new THREE.Vector3(1.4,.3,1.7),TP=new THREE.Vector3(-3.9,.3,.4);
+function cam(){const a=innerWidth/innerHeight,d1=Math.max(13.6,8.2/(.364*a)),d2=1.12*Math.max(3.3/.364,2.5/(.364*a));fz+=(focus-fz)*.08;const d=(d1+(d2-d1)*fz)*zm,t=TA.clone().lerp(TP,fz);C.position.set(t.x+d*Math.sin(yaw)*Math.cos(pit),t.y+d*Math.sin(pit),t.z+d*Math.cos(yaw)*Math.cos(pit));C.lookAt(t)}
 $('#fc').onclick=()=>{focus=focus?0:1;$('#fc').textContent=focus?'Vista d’insieme':'Leggi il foglio'};
 function rs(){R.setSize(innerWidth,innerHeight);C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix()}
 function upd(){$('#pr').textContent=vis.size+'/7 campioni'+(flap?' · post-it aperto':'');drawP();drawPI()}
