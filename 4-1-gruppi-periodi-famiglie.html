@@ -14,10 +14,13 @@ canvas{display:block;touch-action:none}
 #top span{display:inline-block;background:var(--bar);padding:6px 14px;border-radius:999px}
 #msg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff}
 #msg a{color:#9fe}
+#rot{position:fixed;left:50%;top:22%;transform:translateX(-50%);display:none;background:var(--bar);padding:10px 16px;border-radius:14px;text-align:center;box-shadow:0 4px 18px #0006;pointer-events:none;font-weight:600;max-width:80%}
+@media (orientation:portrait) and (max-width:600px){#rot{display:block}}
 button:focus-visible,a:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
 </style></head>
 <body>
 <div id="top"><span>Tocca le tessere · cambia modalità (Famiglie, Gruppi, Periodi) · tocca il post-it per la risposta · trascina per girare la vista</span></div>
+<div id="rot">↻ Ruota il telefono in orizzontale<br>per vedere meglio la scheda</div>
 <div id="msg"><p>Questo prototipo richiede la grafica 3D (WebGL), che qui non è disponibile.<br>Usa la <a href="versione-semplice.html">versione semplice</a>.</p></div>
 <div id="bar"><b>Lezione 4.1 · Gruppi, periodi, famiglie</b><button id="m1">Famiglie</button><button id="m2">Gruppi</button><button id="m3">Periodi</button><span id="pr">0/10 famiglie</span><button id="fc">Leggi il foglio</button><button id="rs">Ripristina vista</button><a href="index.html">← Mappa</a><a href="versione-semplice.html">Versione semplice</a></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -60,7 +63,7 @@ function drawP(k){k=k||1;const g=pg,f=n=>Math.round(n*k),L=n=>Math.round(n*k*1.3
  if(sel<0){g.font='italic 30px '+F;wrap(g,'Tocca una tessera.',70,1092,740,38)}
  else{g.font='bold 30px '+F;g.fillText(CAP[sel][0],70,1088);g.font='28px '+F;wrap(g,CAP[sel][1],70,1128,740,36)}
  if(vis.size===10&&flap){g.save();g.translate(730,120);g.rotate(-.25);g.strokeStyle=g.fillStyle='rgba(181,72,58,.88)';g.lineWidth=5;g.beginPath();g.arc(0,0,64,0,7);g.stroke();g.lineWidth=2;g.beginPath();g.arc(0,0,54,0,7);g.stroke();g.textAlign='center';g.font='bold 22px '+F;g.fillText("TAVOLA",0,-6);g.font='bold 34px '+F;g.fillText('✓',0,32);g.restore()}
- g.save();g.textAlign='left';g.fillStyle='#2f353b';{const T='Materiale didattico biennio tecnico - Istituto Majorana-Giorgi - Prof. Sara Piano';let fs=22;g.font='italic '+fs+'px '+F;while(g.measureText(T).width>740&&fs>12){fs--;g.font='italic '+fs+'px '+F}g.fillText(T,70,52)}g.restore();pt.needsUpdate=true}
+ g.save();g.textAlign='left';g.fillStyle='#2f353b';{const T='Materiale didattico - Istituto Majorana-Giorgi - biennio tecnico - Prof. Sara Piano';let fs=22;g.font='italic '+fs+'px '+F;while(g.measureText(T).width>740&&fs>12){fs--;g.font='italic '+fs+'px '+F}g.fillText(T,70,52)}g.restore();pt.needsUpdate=true}
 /* post-it */
 const[ic,ig]=cvs(1024,1024),it=new THREE.CanvasTexture(ic),sm=new THREE.MeshStandardMaterial({color:0xe9d35a,roughness:.9});it.anisotropy=AN;
 const PI=new THREE.Mesh(new THREE.BoxGeometry(1.9,.02,1.9),[sm,sm,new THREE.MeshStandardMaterial({map:it,roughness:.9}),sm,sm,sm]);PI.position.set(-.6,.011,.9);PI.rotation.y=-.08;PI.castShadow=PI.receiveShadow=true;PI.userData.pi=true;S.add(PI);
@@ -81,8 +84,8 @@ function dish(x,z){const gm=new THREE.MeshPhysicalMaterial({color:0xe8f4f6,trans
 function tag(t,x,z){const[c,g]=cvs(512,192),p=t.split(' · ');g.fillStyle='#fbfaf6';g.fillRect(0,0,512,192);g.strokeStyle='#777';g.lineWidth=6;g.strokeRect(3,3,506,186);g.textAlign='center';
  g.fillStyle=RED;g.font='bold 54px '+F;g.fillText(p[0],256,66);g.fillStyle=INK;let fs=76;g.font='bold '+fs+'px '+F;while(g.measureText(p[1]).width>470&&fs>28){fs-=2;g.font='bold '+fs+'px '+F}g.fillText(p[1],256,156);
  const tx=new THREE.CanvasTexture(c);tx.anisotropy=AN;const m=new THREE.Mesh(new THREE.PlaneGeometry(2.2,.825),new THREE.MeshStandardMaterial({map:tx,roughness:.9}));m.rotation.x=-1;m.position.set(x,.26,z);m.castShadow=m.receiveShadow=true;S.add(m)}
-function tape(s,x,z,ang,col,w){w=w||1.5;const L=s.split('|'),n=L.length,hp=n===1?160:100+n*70,[c,g]=cvs(512,hp),H='"Segoe Print","Bradley Hand","Comic Sans MS","Trebuchet MS",cursive';
- g.beginPath();g.moveTo(14,10);g.lineTo(498,10);for(let y=32,k=0;y<hp-12;y+=22,k++)g.lineTo(k%2?498:506,y);g.lineTo(498,hp-10);g.lineTo(14,hp-10);for(let y=hp-32,k=0;y>12;y-=22,k++)g.lineTo(k%2?14:6,y);g.closePath();
+function tape(s,x,z,ang,col,w){w=w||1.5;const L=s.split('|'),n=L.length,hp=n===1?160:100+n*70,[c,g]=cvs(512,hp),H='"Avenir Next","Segoe UI","Helvetica Neue",Arial,sans-serif';
+ g.beginPath();g.moveTo(14,10);g.lineTo(498,10);for(let y=32,k=0;y<hp-12;y+=22,k++)g.lineTo(498,y);g.lineTo(498,hp-10);g.lineTo(14,hp-10);for(let y=hp-32,k=0;y>12;y-=22,k++)g.lineTo(14,y);g.closePath();
  g.fillStyle=col;g.fill();g.save();g.clip();for(let i=0;i<900;i++){g.fillStyle='rgba('+(Math.random()<.5?'120,100,60':'255,255,255')+','+(.04+Math.random()*.08)+')';g.fillRect(Math.random()*512,Math.random()*hp,1+Math.random()*3,1)}
  g.fillStyle='rgba(255,255,255,.18)';g.fillRect(0,18,512,22);g.restore();
  g.textAlign='center';g.fillStyle='#18203a';L.forEach((t,i)=>{let fs=n===1?84:i?52:76;g.font='bold '+fs+'px '+H;while(g.measureText(t).width>410&&fs>24){fs-=2;g.font='bold '+fs+'px '+H}g.fillText(t,256,n===1?104:34+(hp-48)*(i+.78)/n)});
@@ -93,13 +96,13 @@ function grp(i,y){const g=new THREE.Group();g.position.set(DX[i],y,DZ[i]);g.user
 const SYM="H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og".split(' ');
 const NOM="Idrogeno,Elio,Litio,Berillio,Boro,Carbonio,Azoto,Ossigeno,Fluoro,Neon,Sodio,Magnesio,Alluminio,Silicio,Fosforo,Zolfo,Cloro,Argon,Potassio,Calcio,Scandio,Titanio,Vanadio,Cromo,Manganese,Ferro,Cobalto,Nichel,Rame,Zinco,Gallio,Germanio,Arsenico,Selenio,Bromo,Kripton,Rubidio,Stronzio,Ittrio,Zirconio,Niobio,Molibdeno,Tecnezio,Rutenio,Rodio,Palladio,Argento,Cadmio,Indio,Stagno,Antimonio,Tellurio,Iodio,Xeno,Cesio,Bario,Lantanio,Cerio,Praseodimio,Neodimio,Promezio,Samario,Europio,Gadolinio,Terbio,Disprosio,Olmio,Erbio,Tulio,Itterbio,Lutezio,Afnio,Tantalio,Tungsteno,Renio,Osmio,Iridio,Platino,Oro,Mercurio,Tallio,Piombo,Bismuto,Polonio,Astato,Radon,Francio,Radio,Attinio,Torio,Protoattinio,Uranio,Nettunio,Plutonio,Americio,Curio,Berchelio,Californio,Einsteinio,Fermio,Mendelevio,Nobelio,Laurenzio,Rutherfordio,Dubnio,Seaborgio,Bohrio,Hassio,Meitnerio,Darmstadtio,Roentgenio,Copernicio,Nihonio,Flerovio,Moscovio,Livermorio,Tennesso,Oganesson".split(',');
 if(SYM.length!==118||NOM.length!==118)throw new Error('elenco elementi incompleto');
-const FN=['metalli alcalini','metalli alcalino-terrosi','metalli di transizione','metalli poveri','semimetalli','non metalli','alogeni','gas nobili','terre rare (lantanidi)','attinidi'];
+const FN=['metalli alcalini','metalli alcalino-terrosi','metalli di transizione','metalli poveri','semimetalli','non metalli','alogeni','gas nobili','terre rare','attinidi'];
 const FC=[0xe5484a,0xee7d1a,0xf7e04f,0x8fd18a,0x86cdf2,0x2f6fd0,0xb79cf0,0xf7b3cf,0xecebe8,0xb9bec4];
 const SEMI=[5,14,32,33,51,52],NONM=[1,6,7,8,15,16,34],POOR=[13,31,49,50,81,82,83,84,113,114,115,116];
 function famOf(z,g){if(z>=57&&z<=71)return 8;if(z>=89&&z<=103)return 9;if(SEMI.includes(z))return 4;if(NONM.includes(z))return 5;if(POOR.includes(z))return 3;if(g===18)return 7;if(g===17)return 6;if(g===1&&z>1)return 0;if(g===2)return 1;return 2}
 function posOf(z){if(z===1)return[1,1];if(z===2)return[18,1];if(z<=4)return[z-2,2];if(z<=10)return[z+8,2];if(z<=12)return[z-10,3];if(z<=18)return[z,3];if(z<=36)return[z-18,4];if(z<=54)return[z-36,5];if(z<=56)return[z-54,6];if(z<=71)return[0,6];if(z<=86)return[z-68,6];if(z<=88)return[z-86,7];if(z<=103)return[0,7];return[z-100,7]}
 const EL=SYM.map((sy,i)=>{const z=i+1,ps=posOf(z);return[sy,NOM[i],z,ps[0],ps[1],famOf(z,ps[0])]});
-CAP=EL.map(e=>{const g=e[3],f=e[5],m=g<=2?g:g-10,val=e[2]===2?'2 elettroni di valenza':(g===0||f===2)?'elettroni di valenza variabili':m+(m===1?' elettrone di valenza':' elettroni di valenza'),fam=f>=8?FN[f].replace(/^terre rare \(lantanidi\)$/,'terre rare: lantanidi'):FN[f];return[e[1]+' '+e[0]+' · Z = '+e[2],(g?'Gruppo '+g+' ('+fam+')':'Blocco f: '+fam)+' · periodo '+e[4]+' · '+val+' · '+e[4]+(e[4]===1?' guscio.':' gusci.')]});
+CAP=EL.map(e=>{const g=e[3],f=e[5],m=g<=2?g:g-10,val=e[2]===2?'2 elettroni di valenza':(g===0||f===2)?'elettroni di valenza variabili':m+(m===1?' elettrone di valenza':' elettroni di valenza'),fam=f>=8?FN[f]:FN[f];return[e[1]+' '+e[0]+' · Z = '+e[2],(g?'Gruppo '+g+' ('+fam+')':'Blocco f: '+fam)+' · periodo '+e[4]+' · '+val+' · '+e[4]+(e[4]===1?' guscio.':' gusci.')]});
 let MODE=0;const TL=[],LEG=[];
 const colOf=e=>MODE===0?FC[e[5]]:MODE===1?(e[3]?new THREE.Color().setHSL(((e[3]-1)*.055)%1,.6,.76):0xd7dce1):new THREE.Color().setHSL((e[4]-1)*.13,.6,.76);
 function tileTex(e){const[c,g]=cvs(128,128);g.fillStyle='#fff';g.fillRect(0,0,128,128);g.fillStyle='#14283c';g.textAlign='center';g.font='bold 62px '+F;g.fillText(e[0],64,78);g.font='bold 24px '+F;g.fillText(e[2],64,112);const t=new THREE.CanvasTexture(c);t.anisotropy=AN;return t}
@@ -110,7 +113,7 @@ function plate(s,x,z,w){const[c,g]=cvs(96,96);g.fillStyle='#fbfaf6';g.fillRect(0
 for(let c=1;c<=18;c++)plate(String(c),X0+(c-1)*SP,-.62);for(let p=1;p<=7;p++)plate(String(p),X0-.5,-.2+(p-1)*SP);
 /* segnaposto dei blocchi f (non cliccabili) */
 [[6,'57-71',8],[7,'89-103',9]].forEach(q=>{const[c,g]=cvs(128,128);g.fillStyle='#'+FC[q[2]].toString(16).padStart(6,'0');g.fillRect(0,0,128,128);g.fillStyle='#14283c';g.textAlign='center';g.font='bold 30px '+F;g.fillText(q[1],64,74);const m=new THREE.Mesh(new THREE.BoxGeometry(.34,.04,.34),[1,2,3,4,5,6].map((k)=>new THREE.MeshStandardMaterial(k===3?{map:new THREE.CanvasTexture(c),roughness:.8}:{color:FC[q[2]],roughness:.8})));m.position.set(X0+2*SP,.02,-.2+(q[0]-1)*SP);m.receiveShadow=true;S.add(m)});
-const LGD=[['Alcalini',0],['Alcalino-terrosi',1],['Metalli di|transizione',2],['Metalli|poveri',3],['Semimetalli',4],['Non metalli',5],['Alogeni',6],['Gas nobili',7],['Terre rare|(lantanidi)',8],['Attinidi',9]];
+const LGD=[['Alcalini',0],['Alcalino-terrosi',1],['Metalli di|transizione',2],['Metalli|poveri',3],['Semimetalli',4],['Non metalli',5],['Alogeni',6],['Gas nobili',7],['Terre rare',8],['Attinidi',9]];
 LGD.forEach((q,i)=>{const n=S.children.length,r=i<5?0:1,k=i%5;tape(q[0],1.5+k*1.38,r?4.7:3.95,[-.03,.03,-.02,.04,-.03][k],'#'+FC[q[1]].toString(16).padStart(6,'0'),1.3);LEG.push(S.children[n])});
 const mbt=[['m1',0],['m2',1],['m3',2]];
 function setMode(m){MODE=m;TL.forEach(t=>{const c=colOf(t.e);t.sm.color.set(c);t.tm.color.set(c)});LEG.forEach(l=>l.visible=m===0);mbt.forEach(b=>{$('#'+b[0]).style.borderWidth=b[1]===m?'4px':'1.5px'})}
@@ -118,8 +121,8 @@ mbt.forEach(b=>$('#'+b[0]).onclick=()=>setMode(b[1]));setMode(0);
 function simStep(dt,t){TL.forEach((q,i)=>{let h=false;if(sel>=0){const s=EL[sel],e=q.e;h=MODE===0?e[5]===s[5]:MODE===1?e[3]===s[3]:e[4]===s[4]}const y=.035+(h?.14:0)+(i===sel?.06:0);q.g.position.y+=(y-q.g.position.y)*.15})}
 G.forEach((gr,i)=>{gr.traverse(o=>{if(o.isMesh){o.userData.gi=i;PK.push(o)}});DM[i].forEach(o=>{o.userData.gi=i;PK.push(o)})});
 /* camera e interazione */
-let yaw=0,pit=1.1,zm=1,focus=0,fz=0;const TA=new THREE.Vector3(.65,.3,1.9),TP=new THREE.Vector3(-3.9,.3,.4);
-function cam(){const a=innerWidth/innerHeight,d1=Math.max(13.5,7.3/(.364*a)),d2=1.12*Math.max(3.3/.364,2.5/(.364*a));fz+=(focus-fz)*.08;const d=(d1+(d2-d1)*fz)*zm,t=TA.clone().lerp(TP,fz);C.position.set(t.x+d*Math.sin(yaw)*Math.cos(pit),t.y+d*Math.sin(pit),t.z+d*Math.cos(yaw)*Math.cos(pit));C.lookAt(t)}
+let yaw=0,pit=1.1,zm=1,focus=0,fz=0;const TA=new THREE.Vector3(.65,.3,2.1),TP=new THREE.Vector3(-3.9,.3,.4);
+function cam(){const a=innerWidth/innerHeight,d1=Math.max(13.5,7.6/(.364*a)),d2=1.12*Math.max(3.3/.364,2.5/(.364*a));fz+=(focus-fz)*.08;const d=(d1+(d2-d1)*fz)*zm,t=TA.clone().lerp(TP,fz);C.position.set(t.x+d*Math.sin(yaw)*Math.cos(pit),t.y+d*Math.sin(pit),t.z+d*Math.cos(yaw)*Math.cos(pit));C.lookAt(t)}
 $('#fc').onclick=()=>{focus=focus?0:1;$('#fc').textContent=focus?'Vista d’insieme':'Leggi il foglio'};
 function rs(){R.setSize(innerWidth,innerHeight);C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix()}
 function upd(){$('#pr').textContent=vis.size+'/10 famiglie'+(flap?' · post-it aperto':'');drawP();drawPI()}

@@ -14,10 +14,13 @@ canvas{display:block;touch-action:none}
 #top span{display:inline-block;background:var(--bar);padding:6px 14px;border-radius:999px}
 #msg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff}
 #msg a{color:#9fe}
+#rot{position:fixed;left:50%;top:22%;transform:translateX(-50%);display:none;background:var(--bar);padding:10px 16px;border-radius:14px;text-align:center;box-shadow:0 4px 18px #0006;pointer-events:none;font-weight:600;max-width:80%}
+@media (orientation:portrait) and (max-width:600px){#rot{display:block}}
 button:focus-visible,a:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
 </style></head>
 <body>
 <div id="top"><span>Tocca le piastre Petri · tocca il post-it per la risposta · trascina per girare la vista</span></div>
+<div id="rot">↻ Ruota il telefono in orizzontale<br>per vedere meglio la scheda</div>
 <div id="msg"><p>Questo prototipo richiede la grafica 3D (WebGL), che qui non è disponibile.<br>Usa la <a href="versione-semplice.html">versione semplice</a>.</p></div>
 <div id="bar"><b>Lezione 3.4 · Elementi, ioni, isotopi</b><span id="pr">0/7 campioni</span><button id="fc">Leggi il foglio</button><button id="rs">Ripristina vista</button><a href="index.html">← Mappa</a><a href="versione-semplice.html">Versione semplice</a></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -54,7 +57,7 @@ function drawP(k){k=k||1;const g=pg,f=n=>Math.round(n*k),L=n=>Math.round(n*k*1.3
  [["protoni (Z)", "cambia l’elemento", "#d1495b"], ["neutroni", "stesso elemento: isotopo", "#7d8791"], ["elettroni", "stesso elemento: ione", "#0f8b8d"]].forEach(w=>{const x0=w[2]?104:70;if(w[2]){g.fillStyle=w[2];g.beginPath();g.arc(82,y-f(11),f(11),0,7);g.fill()}g.fillStyle=INK;g.font='italic bold '+f(36)+'px '+F;g.fillText(w[0],x0,y);const ww=g.measureText(w[0]+'  ').width;g.font=f(36)+'px '+F;y=wrap(g,w[1],x0+ww,y,810-x0-ww,L(36))+f(8)});
  y+=f(14);g.fillStyle=RED;g.font='600 '+f(20)+'px '+F;g.fillText('PREVEDI',70,y);y+=f(42);g.fillStyle=INK;g.font=f(36)+'px '+F;y=wrap(g,"Che cosa cambia tra Na e Na⁺? E tra Cl e Cl⁻? E tra ¹H, ²H e ³H? Osserva, poi apri il post-it.",70,y,740,L(36))+f(10);
  g.fillStyle='#262a30';g.font='italic '+f(27)+'px '+F;
- ['Cationi: atomi che perdono elettroni (carica +), come Na → Na⁺.','Anioni: atomi che acquistano elettroni (carica −), come Cl → Cl⁻.','Isotopi: stesso elemento (stesso Z), diverso numero di neutroni.','Regola dell’ottetto: gli atomi tendono ad avere 8 elettroni nel livello più esterno (2 per H e He): Na ne perde uno, Cl ne acquista uno.'].forEach(l=>{y=wrap(g,l,70,y+f(14),740,L(27))+f(2)});
+ ['Ioni: catione (+) se l’atomo perde elettroni, anione (−) se ne acquista.','Ottetto: Na perde 1 elettrone e Cl ne acquista 1 per avere 8 elettroni esterni.'].forEach(l=>{y=wrap(g,l,70,y+f(14),740,L(27))+f(2)});
  g.font='italic '+f(23)+'px '+F;y=wrap(g,'Disegni: cerchio vuoto = elettrone perso o mancante; ambra = elettrone ceduto o acquistato.',70,y+f(12),740,L(23))+f(2);
  if(y>980&&k>.6){drawP(k*.94);return}
  g.strokeStyle='#b8b5ac';g.lineWidth=2;g.beginPath();g.moveTo(70,1000);g.lineTo(810,1000);g.stroke();
@@ -62,7 +65,7 @@ function drawP(k){k=k||1;const g=pg,f=n=>Math.round(n*k),L=n=>Math.round(n*k*1.3
  if(sel<0){g.font='italic 30px '+F;wrap(g,'Tocca un campione.',70,1092,740,38)}
  else{g.font='bold 30px '+F;g.fillText(CAP[sel][0],70,1088);g.font='28px '+F;wrap(g,CAP[sel][1],70,1128,740,36)}
  if(vis.size===7&&flap){g.save();g.translate(730,120);g.rotate(-.25);g.strokeStyle=g.fillStyle='rgba(181,72,58,.88)';g.lineWidth=5;g.beginPath();g.arc(0,0,64,0,7);g.stroke();g.lineWidth=2;g.beginPath();g.arc(0,0,54,0,7);g.stroke();g.textAlign='center';g.font='bold 22px '+F;g.fillText("ISOTOPI",0,-6);g.font='bold 34px '+F;g.fillText('✓',0,32);g.restore()}
- g.save();g.textAlign='left';g.fillStyle='#2f353b';{const T='Materiale didattico biennio tecnico - Istituto Majorana-Giorgi - Prof. Sara Piano';let fs=22;g.font='italic '+fs+'px '+F;while(g.measureText(T).width>740&&fs>12){fs--;g.font='italic '+fs+'px '+F}g.fillText(T,70,52)}g.restore();pt.needsUpdate=true}
+ g.save();g.textAlign='left';g.fillStyle='#2f353b';{const T='Materiale didattico - Istituto Majorana-Giorgi - biennio tecnico - Prof. Sara Piano';let fs=22;g.font='italic '+fs+'px '+F;while(g.measureText(T).width>740&&fs>12){fs--;g.font='italic '+fs+'px '+F}g.fillText(T,70,52)}g.restore();pt.needsUpdate=true}
 /* post-it */
 const[ic,ig]=cvs(1024,1024),it=new THREE.CanvasTexture(ic),sm=new THREE.MeshStandardMaterial({color:0xe9d35a,roughness:.9});it.anisotropy=AN;
 const PI=new THREE.Mesh(new THREE.BoxGeometry(1.9,.02,1.9),[sm,sm,new THREE.MeshStandardMaterial({map:it,roughness:.9}),sm,sm,sm]);PI.position.set(-.6,.011,.9);PI.rotation.y=-.08;PI.castShadow=PI.receiveShadow=true;PI.userData.pi=true;S.add(PI);
@@ -83,9 +86,9 @@ function dish(x,z){const gm=new THREE.MeshPhysicalMaterial({color:0xe8f4f6,trans
 function tag(t,x,z){const[c,g]=cvs(512,192),p=t.split(' · ');g.fillStyle='#fbfaf6';g.fillRect(0,0,512,192);g.strokeStyle='#777';g.lineWidth=6;g.strokeRect(3,3,506,186);g.textAlign='center';
  g.fillStyle=RED;g.font='bold 54px '+F;g.fillText(p[0],256,66);g.fillStyle=INK;let fs=76;g.font='bold '+fs+'px '+F;while(g.measureText(p[1]).width>470&&fs>28){fs-=2;g.font='bold '+fs+'px '+F}g.fillText(p[1],256,156);
  const tx=new THREE.CanvasTexture(c);tx.anisotropy=AN;const m=new THREE.Mesh(new THREE.PlaneGeometry(2.2,.825),new THREE.MeshStandardMaterial({map:tx,roughness:.9}));m.rotation.x=-1;m.position.set(x,.26,z);m.castShadow=m.receiveShadow=true;S.add(m)}
-function tape(s,x,z,ang,col,w){w=w||1.5;const L=s.split('|'),n=L.length,hp=n===1?160:100+n*70,[c,g]=cvs(512,hp),H='"Segoe Print","Bradley Hand","Comic Sans MS","Trebuchet MS",cursive';
- g.beginPath();g.moveTo(14,10);g.lineTo(498,10);for(let y=32,k=0;y<hp-12;y+=22,k++)g.lineTo(k%2?498:506,y);g.lineTo(498,hp-10);g.lineTo(14,hp-10);for(let y=hp-32,k=0;y>12;y-=22,k++)g.lineTo(k%2?14:6,y);g.closePath();
- g.fillStyle=col;g.fill();g.save();g.clip();for(let i=0;i<900;i++){g.fillStyle='rgba('+(Math.random()<.5?'120,100,60':'255,255,255')+','+(.04+Math.random()*.08)+')';g.fillRect(Math.random()*512,Math.random()*hp,1+Math.random()*3,1)}
+function tape(s,x,z,ang,col,w){w=w||1.5;const L=s.split('|'),n=L.length,hp=n===1?160:100+n*70,[c,g]=cvs(512,hp),H='"Avenir Next","Segoe UI","Helvetica Neue",Arial,sans-serif';
+ g.beginPath();g.moveTo(14,10);g.lineTo(498,10);for(let y=32,k=0;y<hp-12;y+=22,k++)g.lineTo(498,y);g.lineTo(498,hp-10);g.lineTo(14,hp-10);for(let y=hp-32,k=0;y>12;y-=22,k++)g.lineTo(14,y);g.closePath();
+ g.fillStyle=col;g.fill();if(col!=='rgba(0,0,0,0)'){g.fillStyle='rgba(255,255,255,.5)';g.fill()}g.save();g.clip();for(let i=0;i<900;i++){g.fillStyle='rgba('+(Math.random()<.5?'120,100,60':'255,255,255')+','+(.04+Math.random()*.08)+')';g.fillRect(Math.random()*512,Math.random()*hp,1+Math.random()*3,1)}
  g.fillStyle='rgba(255,255,255,.18)';g.fillRect(0,18,512,22);g.restore();
  g.textAlign='center';g.fillStyle='#18203a';L.forEach((t,i)=>{let fs=n===1?84:i?52:76;g.font='bold '+fs+'px '+H;while(g.measureText(t).width>410&&fs>24){fs-=2;g.font='bold '+fs+'px '+H}g.fillText(t,256,n===1?104:34+(hp-48)*(i+.78)/n)});
  const tx=new THREE.CanvasTexture(c);tx.anisotropy=AN;const m=new THREE.Mesh(new THREE.PlaneGeometry(w,w*hp/512),new THREE.MeshStandardMaterial({map:tx,transparent:true,roughness:.95,depthWrite:false}));m.rotation.set(-Math.PI/2,0,ang||0);m.position.set(x,.01,z);m.receiveShadow=true;S.add(m)}
@@ -125,8 +128,8 @@ tape('elettrone perso',4.95,-2.15,.03,'rgba(242,212,138,.96)',1.5);
 function simStep(dt,t){ATM.forEach(rs=>rs.forEach((rg,k)=>{rg.rotation.y=t*(k%2?-1:1)*(.5-.12*k)}));FREE.position.set(1.45+Math.sin(t*1.6)*.1,Math.sin(t*3)*.03,Math.cos(t*1.3)*.08)}
 G.forEach((gr,i)=>{gr.traverse(o=>{if(o.isMesh){o.userData.gi=i;PK.push(o)}});DM[i].forEach(o=>{o.userData.gi=i;PK.push(o)})});
 /* camera e interazione */
-let yaw=0,pit=1.1,zm=1,focus=0,fz=0;const TA=new THREE.Vector3(.1,.3,1.35),TP=new THREE.Vector3(-3.9,.3,.4);
-function cam(){const a=innerWidth/innerHeight,d1=Math.max(13.6,7/(.364*a)),d2=1.12*Math.max(3.3/.364,2.5/(.364*a));fz+=(focus-fz)*.08;const d=(d1+(d2-d1)*fz)*zm,t=TA.clone().lerp(TP,fz);C.position.set(t.x+d*Math.sin(yaw)*Math.cos(pit),t.y+d*Math.sin(pit),t.z+d*Math.cos(yaw)*Math.cos(pit));C.lookAt(t)}
+let yaw=0,pit=1.1,zm=1,focus=0,fz=0;const TA=new THREE.Vector3(.1,.3,1.7),TP=new THREE.Vector3(-3.9,.3,.4);
+function cam(){const a=innerWidth/innerHeight,d1=Math.max(13.6,7.4/(.364*a)),d2=1.12*Math.max(3.3/.364,2.5/(.364*a));fz+=(focus-fz)*.08;const d=(d1+(d2-d1)*fz)*zm,t=TA.clone().lerp(TP,fz);C.position.set(t.x+d*Math.sin(yaw)*Math.cos(pit),t.y+d*Math.sin(pit),t.z+d*Math.cos(yaw)*Math.cos(pit));C.lookAt(t)}
 $('#fc').onclick=()=>{focus=focus?0:1;$('#fc').textContent=focus?'Vista d’insieme':'Leggi il foglio'};
 function rs(){R.setSize(innerWidth,innerHeight);C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix()}
 function upd(){$('#pr').textContent=vis.size+'/7 campioni'+(flap?' · post-it aperto':'');drawP();drawPI()}

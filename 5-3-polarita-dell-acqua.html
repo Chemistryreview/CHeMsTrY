@@ -14,10 +14,13 @@ canvas{display:block;touch-action:none}
 #top span{display:inline-block;background:var(--bar);padding:6px 14px;border-radius:999px}
 #msg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff}
 #msg a{color:#9fe}
+#rot{position:fixed;left:50%;top:22%;transform:translateX(-50%);display:none;background:var(--bar);padding:10px 16px;border-radius:14px;text-align:center;box-shadow:0 4px 18px #0006;pointer-events:none;font-weight:600;max-width:80%}
+@media (orientation:portrait) and (max-width:600px){#rot{display:block}}
 button:focus-visible,a:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
 </style></head>
 <body>
 <div id="top"><span>Tocca le piastre Petri · tocca il post-it per la risposta · trascina per girare la vista</span></div>
+<div id="rot">↻ Ruota il telefono in orizzontale<br>per vedere meglio la scheda</div>
 <div id="msg"><p>Questo prototipo richiede la grafica 3D (WebGL), che qui non è disponibile.<br>Usa la <a href="versione-semplice.html">versione semplice</a>.</p></div>
 <div id="bar"><b>Lezione 5.3 · La polarità dell’acqua</b><span id="pr">0/3 campioni</span><button id="fc">Leggi il foglio</button><button id="rs">Ripristina vista</button><a href="index.html">← Mappa</a><a href="versione-semplice.html">Versione semplice</a></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -60,10 +63,10 @@ function drawP(k){k=k||1;const g=pg,f=n=>Math.round(n*k),L=n=>Math.round(n*k*1.3
  if(sel<0){g.font='italic 30px '+F;wrap(g,'Tocca un campione.',70,1092,740,38)}
  else{g.font='bold 30px '+F;g.fillText(CAP[sel][0],70,1088);g.font='28px '+F;wrap(g,CAP[sel][1],70,1128,740,36)}
  if(vis.size===3&&flap){g.save();g.translate(730,120);g.rotate(-.25);g.strokeStyle=g.fillStyle='rgba(181,72,58,.88)';g.lineWidth=5;g.beginPath();g.arc(0,0,64,0,7);g.stroke();g.lineWidth=2;g.beginPath();g.arc(0,0,54,0,7);g.stroke();g.textAlign='center';g.font='bold 22px '+F;g.fillText("ACQUA",0,-6);g.font='bold 34px '+F;g.fillText('✓',0,32);g.restore()}
- g.save();g.textAlign='left';g.fillStyle='#2f353b';{const T='Materiale didattico biennio tecnico - Istituto Majorana-Giorgi - Prof. Sara Piano';let fs=22;g.font='italic '+fs+'px '+F;while(g.measureText(T).width>740&&fs>12){fs--;g.font='italic '+fs+'px '+F}g.fillText(T,70,52)}g.restore();pt.needsUpdate=true}
+ g.save();g.textAlign='left';g.fillStyle='#2f353b';{const T='Materiale didattico - Istituto Majorana-Giorgi - biennio tecnico - Prof. Sara Piano';let fs=22;g.font='italic '+fs+'px '+F;while(g.measureText(T).width>740&&fs>12){fs--;g.font='italic '+fs+'px '+F}g.fillText(T,70,52)}g.restore();pt.needsUpdate=true}
 /* post-it */
 const[ic,ig]=cvs(1024,1024),it=new THREE.CanvasTexture(ic),sm=new THREE.MeshStandardMaterial({color:0xe9d35a,roughness:.9});it.anisotropy=AN;
-const PI=new THREE.Mesh(new THREE.BoxGeometry(1.9,.02,1.9),[sm,sm,new THREE.MeshStandardMaterial({map:it,roughness:.9}),sm,sm,sm]);PI.position.set(-.6,.011,.9);PI.rotation.y=-.08;PI.castShadow=PI.receiveShadow=true;PI.userData.pi=true;S.add(PI);
+const PI=new THREE.Mesh(new THREE.BoxGeometry(1.9,.02,1.9),[sm,sm,new THREE.MeshStandardMaterial({map:it,roughness:.9}),sm,sm,sm]);PI.position.set(-.5,.011,-1.85);PI.rotation.y=-.08;PI.castShadow=PI.receiveShadow=true;PI.userData.pi=true;S.add(PI);
 function drawPI(){const g=ig,H='"Trebuchet MS","Segoe UI",Arial,sans-serif';g.setTransform(2,0,0,2,0,0);g.fillStyle='#f6e36a';g.fillRect(0,0,512,512);g.fillStyle='rgba(0,0,0,.07)';g.fillRect(0,0,512,36);g.fillStyle='#1f1805';
  if(flap){g.font='bold 40px '+H;g.fillText('Risposta',32,96);g.font='bold 34px '+H;wrap(g,'Le molecole d’acqua (polari) circondano gli ioni Na⁺ e Cl⁻ e li separano. L’olio è apolare: nessuna attrazione.',32,150,448,44)}
  else{g.font='bold 66px '+H;g.fillText('Perché?',32,130);g.font='bold 34px '+H;wrap(g,'Prima fai la tua previsione, poi tocca il post-it.',32,200,448,44)}
@@ -81,16 +84,16 @@ function dish(x,z){const gm=new THREE.MeshPhysicalMaterial({color:0xe8f4f6,trans
 function tag(t,x,z){const[c,g]=cvs(512,192),p=t.split(' · ');g.fillStyle='#fbfaf6';g.fillRect(0,0,512,192);g.strokeStyle='#777';g.lineWidth=6;g.strokeRect(3,3,506,186);g.textAlign='center';
  g.fillStyle=RED;g.font='bold 54px '+F;g.fillText(p[0],256,66);g.fillStyle=INK;let fs=76;g.font='bold '+fs+'px '+F;while(g.measureText(p[1]).width>470&&fs>28){fs-=2;g.font='bold '+fs+'px '+F}g.fillText(p[1],256,156);
  const tx=new THREE.CanvasTexture(c);tx.anisotropy=AN;const m=new THREE.Mesh(new THREE.PlaneGeometry(2.2,.825),new THREE.MeshStandardMaterial({map:tx,roughness:.9}));m.rotation.x=-1;m.position.set(x,.26,z);m.castShadow=m.receiveShadow=true;S.add(m)}
-function tape(s,x,z,ang,col,w){w=w||1.5;const L=s.split('|'),n=L.length,hp=n===1?160:100+n*70,[c,g]=cvs(512,hp),H='"Segoe Print","Bradley Hand","Comic Sans MS","Trebuchet MS",cursive';
- g.beginPath();g.moveTo(14,10);g.lineTo(498,10);for(let y=32,k=0;y<hp-12;y+=22,k++)g.lineTo(k%2?498:506,y);g.lineTo(498,hp-10);g.lineTo(14,hp-10);for(let y=hp-32,k=0;y>12;y-=22,k++)g.lineTo(k%2?14:6,y);g.closePath();
- g.fillStyle=col;g.fill();g.save();g.clip();for(let i=0;i<900;i++){g.fillStyle='rgba('+(Math.random()<.5?'120,100,60':'255,255,255')+','+(.04+Math.random()*.08)+')';g.fillRect(Math.random()*512,Math.random()*hp,1+Math.random()*3,1)}
+function tape(s,x,z,ang,col,w){w=w||1.5;const L=s.split('|'),n=L.length,hp=n===1?160:100+n*70,[c,g]=cvs(512,hp),H='"Avenir Next","Segoe UI","Helvetica Neue",Arial,sans-serif';
+ g.beginPath();g.moveTo(14,10);g.lineTo(498,10);for(let y=32,k=0;y<hp-12;y+=22,k++)g.lineTo(498,y);g.lineTo(498,hp-10);g.lineTo(14,hp-10);for(let y=hp-32,k=0;y>12;y-=22,k++)g.lineTo(14,y);g.closePath();
+ g.fillStyle=col;g.fill();if(col!=='rgba(0,0,0,0)'){g.fillStyle='rgba(255,255,255,.5)';g.fill()}g.save();g.clip();for(let i=0;i<900;i++){g.fillStyle='rgba('+(Math.random()<.5?'120,100,60':'255,255,255')+','+(.04+Math.random()*.08)+')';g.fillRect(Math.random()*512,Math.random()*hp,1+Math.random()*3,1)}
  g.fillStyle='rgba(255,255,255,.18)';g.fillRect(0,18,512,22);g.restore();
  g.textAlign='center';g.fillStyle='#18203a';L.forEach((t,i)=>{let fs=n===1?84:i?52:76;g.font='bold '+fs+'px '+H;while(g.measureText(t).width>410&&fs>24){fs-=2;g.font='bold '+fs+'px '+H}g.fillText(t,256,n===1?104:34+(hp-48)*(i+.78)/n)});
  const tx=new THREE.CanvasTexture(c);tx.anisotropy=AN;const m=new THREE.Mesh(new THREE.PlaneGeometry(w,w*hp/512),new THREE.MeshStandardMaterial({map:tx,transparent:true,roughness:.95,depthWrite:false}));m.rotation.set(-Math.PI/2,0,ang||0);m.position.set(x,.01,z);m.receiveShadow=true;S.add(m)}
 function ball(r,c){const m=new THREE.Mesh(new THREE.SphereGeometry(r,24,16),new THREE.MeshToonMaterial({color:c}));m.castShadow=true;const o=new THREE.Mesh(m.geometry,OL);o.scale.setScalar(1.12);m.add(o);return m}
 function stick(a,b){const d=new THREE.Vector3().subVectors(b,a),m=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,d.length(),8),new THREE.MeshToonMaterial({color:0x55606b}));m.position.copy(a).addScaledVector(d,.5);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.clone().normalize());m.castShadow=true;return m}
 function grp(i,y){const g=new THREE.Group();g.position.set(DX[i],y,DZ[i]);g.userData={y:y,s:.9};g.scale.setScalar(.9);S.add(g);G.push(g);DM.push(dish(DX[i],DZ[i]));tape('Acqua',DX[i],DZ[i]+1.38,-.05,'rgba(166,216,212,.96)');return g}
-function spr(t,x,y,z,w){w=w||.8;const[c,g]=cvs(256,96);g.fillStyle='rgba(255,255,255,.9)';g.fillRect(2,2,252,92);g.fillStyle='#14283c';g.textAlign='center';let fs=64;g.font='bold '+fs+'px '+F;while(g.measureText(t).width>236&&fs>20){fs-=2;g.font='bold '+fs+'px '+F}g.fillText(t,128,68);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));s.scale.set(w,w*.375,1);s.position.set(x,y,z||0);return s}
+const SF='"Avenir Next","Segoe UI","Helvetica Neue",Arial,sans-serif';function spr(t,x,y,z,w){w=w||.8;const[c,g]=cvs(256,96);g.fillStyle='rgba(255,255,255,.9)';g.fillRect(2,2,252,92);g.fillStyle='#14283c';g.textAlign='center';let fs=64;g.font='bold '+fs+'px '+SF;while(g.measureText(t).width>236&&fs>20){fs-=2;g.font='bold '+fs+'px '+SF}g.fillText(t,128,68);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));s.scale.set(w,w*.375,1);s.position.set(x,y,z||0);return s}
 const GL=new THREE.MeshPhysicalMaterial({color:0xe8f4f6,transparent:true,opacity:.28,roughness:.05,clearcoat:1,clearcoatRoughness:.05,side:THREE.DoubleSide,depthWrite:false}),STL=new THREE.MeshStandardMaterial({color:0x9aa3aa,metalness:.5,roughness:.4});
 const liq=(c,o)=>new THREE.MeshStandardMaterial({color:c,transparent:o<1,opacity:o,roughness:.2,depthWrite:false,side:THREE.DoubleSide});
 function lab(t,x,y,z,w){const[c,g]=cvs(128,128);g.textAlign='center';g.font='bold 92px '+F;g.lineWidth=14;g.lineJoin='round';g.strokeStyle='#14283c';g.strokeText(t,64,96);g.fillStyle='#fff';g.fillText(t,64,96);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));s.scale.set(w,w,1);s.position.set(x,y,z||0);return s}
@@ -107,7 +110,7 @@ g=grp2(3.7,-.4);g.scale.setScalar(.9);{const ct=new THREE.Group();ct.position.y=
  const lq=new THREE.Mesh(new THREE.CylinderGeometry(.96,.96,1.65,48),liq(0x7ec8e3,.35));lq.position.y=.88;g.add(lq);
  [[-.45,.65,0,0],[.45,.65,0,1],[0,1.2,.45,0],[0,1.2,-.45,1]].forEach(p=>{const an=p[3],i=ball(an?.26:.16,an?TEA:COR);i.position.set(p[0],p[1],p[2]);ct.add(i);
   for(let k=0;k<3;k++){const a=k*2.094+p[0]*3+p[2]*2,el=(k-1)*.5,d=an?.52:.42,v=new THREE.Vector3(Math.cos(a)*Math.cos(el),Math.sin(el),Math.sin(a)*Math.cos(el)),m=wm(.9);m.position.set(p[0]+v.x*d,p[1]+v.y*d,p[2]+v.z*d);aim(m,an?v:v.clone().negate());ct.add(m)}});
- g.add(spr('sale sciolto',0,2.7,0,1.6))}
+ g.add(spr('sale sciolto',0,2.7,0,1.0))}
 tape('Acqua + sale',3.7,1.05,.04,'rgba(242,212,138,.96)');
 g=grp2(6,-.4);g.scale.setScalar(.8);{const PR=[[.07,0],[.07,.55],[.15,.9],[.45,1.25],[.7,1.75],[.75,2.2],[.6,2.75],[.22,3.1],[.18,3.4]];
  const rad=y=>{for(let i=1;i<PR.length;i++)if(y<=PR[i][1]){const a=PR[i-1],b=PR[i],f=(y-a[1])/(b[1]-a[1]);return a[0]+(b[0]-a[0])*f}return PR[PR.length-1][0]};
@@ -121,12 +124,12 @@ g=grp2(6,-.4);g.scale.setScalar(.8);{const PR=[[.07,0],[.07,.55],[.15,.9],[.45,1
  const ct=new THREE.Group();ct.position.y=.55;g.add(ct);g.userData.c=ct;
  for(let k=0;k<9;k++){const m=wm(.8),y=1.1+rnd()*.75,r=rad(y)*.7*Math.sqrt(rnd()),a=rnd()*6.28;m.position.set(Math.cos(a)*r,y,Math.sin(a)*r);m.rotation.set(rnd()*6,rnd()*6,rnd()*6);ct.add(m)}
  for(let k=0;k<6;k++){const y=2.05+rnd()*.5,r=rad(y)*.6*Math.sqrt(rnd()),a=rnd()*6.28,ch=new THREE.Group();for(let j=0;j<4;j++){const c=ball(.09,0x6b7782);c.position.set(j*.17-.25,(j%2)*.1,0);ch.add(c);if(j)ch.add(stick(new THREE.Vector3((j-1)*.17-.25,((j-1)%2)*.1,0),new THREE.Vector3(j*.17-.25,(j%2)*.1,0)))}ch.position.set(Math.cos(a)*r,y,Math.sin(a)*r);ch.rotation.set(rnd()*3,rnd()*6,rnd()*3);ct.add(ch)}
- g.add(spr('olio (apolare)',1.35,2.85,0,1.7),spr('acqua (polare)',1.35,2,0,1.7))}
+ g.add(spr('olio (apolare)',1.2,2.85,0,1.1),spr('acqua (polare)',1.2,2.1,0,1.1))}
 tape('Acqua + olio',6,1.05,-.03,'rgba(241,169,176,.96)');
 G.forEach((gr,i)=>{gr.traverse(o=>{if(o.isMesh){o.userData.gi=i;PK.push(o)}});DM[i].forEach(o=>{o.userData.gi=i;PK.push(o)})});
 /* camera e interazione */
-let yaw=0,pit=1.1,zm=1,focus=0,fz=0;const TA=new THREE.Vector3(.75,.3,.5),TP=new THREE.Vector3(-3.9,.3,.4);
-function cam(){const a=innerWidth/innerHeight,d1=Math.max(10,7.4/(.364*a)),d2=1.12*Math.max(3.3/.364,2.5/(.364*a));fz+=(focus-fz)*.08;const d=(d1+(d2-d1)*fz)*zm,t=TA.clone().lerp(TP,fz);C.position.set(t.x+d*Math.sin(yaw)*Math.cos(pit),t.y+d*Math.sin(pit),t.z+d*Math.cos(yaw)*Math.cos(pit));C.lookAt(t)}
+let yaw=0,pit=1.1,zm=1,focus=0,fz=0;const TA=new THREE.Vector3(0.75,.3,1.0),TP=new THREE.Vector3(-3.9,.3,.4);
+function cam(){const a=innerWidth/innerHeight,d1=Math.max(10,7.7/(.364*a)),d2=1.12*Math.max(3.3/.364,2.5/(.364*a));fz+=(focus-fz)*.08;const d=(d1+(d2-d1)*fz)*zm,t=TA.clone().lerp(TP,fz);C.position.set(t.x+d*Math.sin(yaw)*Math.cos(pit),t.y+d*Math.sin(pit),t.z+d*Math.cos(yaw)*Math.cos(pit));C.lookAt(t)}
 $('#fc').onclick=()=>{focus=focus?0:1;$('#fc').textContent=focus?'Vista d’insieme':'Leggi il foglio'};
 function rs(){R.setSize(innerWidth,innerHeight);C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix()}
 function upd(){$('#pr').textContent=vis.size+'/3 campioni'+(flap?' · post-it aperto':'');drawP();drawPI()}

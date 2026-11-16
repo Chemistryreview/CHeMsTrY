@@ -14,10 +14,13 @@ canvas{display:block;touch-action:none}
 #top span{display:inline-block;background:var(--bar);padding:6px 14px;border-radius:999px}
 #msg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff}
 #msg a{color:#9fe}
+#rot{position:fixed;left:50%;top:22%;transform:translateX(-50%);display:none;background:var(--bar);padding:10px 16px;border-radius:14px;text-align:center;box-shadow:0 4px 18px #0006;pointer-events:none;font-weight:600;max-width:80%}
+@media (orientation:portrait) and (max-width:600px){#rot{display:block}}
 button:focus-visible,a:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
 </style></head>
 <body>
 <div id="top"><span>Tocca gli apparecchi · prova il campo elettrico · tocca il post-it per la risposta · trascina per girare la vista</span></div>
+<div id="rot">↻ Ruota il telefono in orizzontale<br>per vedere meglio la scheda</div>
 <div id="msg"><p>Questo prototipo richiede la grafica 3D (WebGL), che qui non è disponibile.<br>Usa la <a href="versione-semplice.html">versione semplice</a>.</p></div>
 <div id="bar"><b>Lezione 3.2 · Gli esperimenti</b><button id="fe">Campo elettrico: OFF</button><span id="rd"></span><span id="pr">0/2 esperimenti</span><button id="fc">Leggi il foglio</button><button id="rs">Ripristina vista</button><a href="index.html">← Mappa</a><a href="versione-semplice.html">Versione semplice</a></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -65,7 +68,7 @@ function drawP(k){k=k||1;const g=pg,f=n=>Math.round(n*k),lh=f(27);g.setTransform
  if(sel<0){g.font='italic 28px '+F;wrap(g,'Tocca un apparecchio sul bancone.',70,1094,740,36)}
  else{g.font='bold 30px '+F;g.fillText(CAP[sel][0],70,1092);g.font='26px '+F;wrap(g,CAP[sel][1],70,1130,740,33)}
  if(vis.size===2&&flap){g.save();g.translate(730,100);g.rotate(-.25);g.strokeStyle=g.fillStyle='rgba(181,72,58,.88)';g.lineWidth=5;g.beginPath();g.arc(0,0,64,0,7);g.stroke();g.lineWidth=2;g.beginPath();g.arc(0,0,54,0,7);g.stroke();g.textAlign='center';g.font='bold 20px '+F;g.fillText('ESPERIMENTI',0,-6);g.font='bold 34px '+F;g.fillText('✓',0,32);g.restore()}
- g.save();g.textAlign='left';g.fillStyle='#2f353b';{const T='Materiale didattico biennio tecnico - Istituto Majorana-Giorgi - Prof. Sara Piano';let fs=22;g.font='italic '+fs+'px '+F;while(g.measureText(T).width>740&&fs>12){fs--;g.font='italic '+fs+'px '+F}g.fillText(T,70,52)}g.restore();pt.needsUpdate=true}
+ g.save();g.textAlign='left';g.fillStyle='#2f353b';{const T='Materiale didattico - Istituto Majorana-Giorgi - biennio tecnico - Prof. Sara Piano';let fs=22;g.font='italic '+fs+'px '+F;while(g.measureText(T).width>740&&fs>12){fs--;g.font='italic '+fs+'px '+F}g.fillText(T,70,52)}g.restore();pt.needsUpdate=true}
 /* post-it */
 const[ic,ig]=cvs(1024,1024),it=new THREE.CanvasTexture(ic),sm=new THREE.MeshStandardMaterial({color:0xe9d35a,roughness:.9});it.anisotropy=AN;
 const PI=new THREE.Mesh(new THREE.BoxGeometry(1.9,.02,1.9),[sm,sm,new THREE.MeshStandardMaterial({map:it,roughness:.9}),sm,sm,sm]);PI.position.set(-.6,.011,.9);PI.rotation.y=-.08;PI.castShadow=PI.receiveShadow=true;PI.userData.pi=true;S.add(PI);
@@ -87,7 +90,7 @@ function tag(t,x,z,w){w=w||2.2;const[c,g]=cvs(512,192),p=t.split('|');g.fillStyl
  const fit=(s,fs,mn)=>{g.font='bold '+fs+'px '+F;while(g.measureText(s).width>470&&fs>mn){fs-=2;g.font='bold '+fs+'px '+F}};
  if(p[1]){fit(p[0],70,30);g.fillText(p[0],256,82);g.fillStyle=RED;fit(p[1],44,22);g.fillText(p[1],256,150)}else{fit(p[0],84,30);g.fillText(p[0],256,118)}
  const tx=new THREE.CanvasTexture(c);tx.anisotropy=AN;const m=new THREE.Mesh(new THREE.PlaneGeometry(w,w*.375),new THREE.MeshStandardMaterial({map:tx,roughness:.9}));m.rotation.x=-1;m.position.set(x,.26,z);m.castShadow=m.receiveShadow=true;S.add(m)}
-function note(L,x,z,col,w,h,ry){const px=512,py=Math.round(512*h/w),[c,g]=cvs(px,py),H='"Trebuchet MS","Segoe UI",Arial,sans-serif';g.fillStyle=col;g.fillRect(0,0,px,py);g.fillStyle='rgba(0,0,0,.07)';g.fillRect(0,0,px,34);g.textAlign='center';g.fillStyle='#1f1805';
+function note(L,x,z,col,w,h,ry){const px=512,py=Math.round(512*h/w),[c,g]=cvs(px,py),H='"Avenir Next","Segoe UI","Helvetica Neue",Arial,sans-serif';g.fillStyle=col;g.fillRect(0,0,px,py);g.fillStyle='rgba(0,0,0,.07)';g.fillRect(0,0,px,34);g.textAlign='center';g.fillStyle='#1f1805';
  const n=L.length,top=56,gap=(py-top-26)/n;L.forEach((s,i)=>{let fs=i?54:76;g.font='bold '+fs+'px '+H;while(g.measureText(s).width>466&&fs>22){fs-=2;g.font='bold '+fs+'px '+H}g.fillText(s,px/2,top+gap*(i+.78))});
  const tx=new THREE.CanvasTexture(c);tx.anisotropy=AN;const sm=new THREE.MeshStandardMaterial({color:new THREE.Color(col),roughness:.9}),m=new THREE.Mesh(new THREE.BoxGeometry(w,.02,h),[sm,sm,new THREE.MeshStandardMaterial({map:tx,roughness:.9}),sm,sm,sm]);m.position.set(x,.011,z);m.rotation.y=ry||0;m.castShadow=m.receiveShadow=true;S.add(m)}
 function ball(r,c){const m=new THREE.Mesh(new THREE.SphereGeometry(r,24,16),new THREE.MeshToonMaterial({color:c}));m.castShadow=true;const o=new THREE.Mesh(m.geometry,OL);o.scale.setScalar(1.12);m.add(o);return m}
@@ -109,7 +112,7 @@ let g=grp2(3,-2.1);{const tb=new THREE.Mesh(new THREE.CylinderGeometry(.4,.4,3.9
  
  const sg=[spr('+',.65,1.55,0,.45),spr('−',.65,.05,0,.45)];sg.forEach(s=>{s.visible=false;g.add(s)});
  const E2=[];for(let i=0;i<24;i++){const e=ball(.045,TEA);g.add(e);E2.push(e)}TH={pl,sg,E2,spot}}
-note(['Thomson','tubo a raggi catodici','placche cariche','schermo fluorescente'],6.25,-2.1,'#ffe58a',1.95,1.6,-.04);
+note(['Thomson','tubo a raggi catodici','placche cariche','schermo fluorescente'],6.25,-2.1,'#f6ecc4',1.95,1.6,-.04);
 g=grp2(3.3,1.2);{const foil=new THREE.Mesh(new THREE.BoxGeometry(.03,.8,1.1),new THREE.MeshStandardMaterial({color:0xe0b43a,metalness:.7,roughness:.3}));foil.position.y=.45;foil.castShadow=true;g.add(foil);
  const rg=new THREE.Group();rg.rotation.x=-Math.PI/2;rg.position.y=.2;g.add(rg);
  const ar=new THREE.Mesh(new THREE.TorusGeometry(1.7,.09,8,72,Math.PI*2-.5),new THREE.MeshStandardMaterial({color:0x2d5a3a,emissive:0x2dff7a,emissiveIntensity:.25,roughness:.5}));ar.rotation.z=Math.PI+.25;rg.add(ar);
@@ -118,7 +121,7 @@ g=grp2(3.3,1.2);{const foil=new THREE.Mesh(new THREE.BoxGeometry(.03,.8,1.1),new
  for(let i=0;i<50;i++){const a=ball(.065,COR);a.visible=false;g.add(a);AL.push({m:a,on:false,x:0,z:0,vx:0,vz:0,dec:false,k:0})}
  for(let i=0;i<40;i++){const s=new THREE.Mesh(new THREE.SphereGeometry(.07,10,8),new THREE.MeshBasicMaterial({color:0xbfffd0,transparent:true}));s.visible=false;g.add(s);SP.push({m:s,t:0})}
  TH.R=g}
-note(['Rutherford','sorgente di particelle α','lamina d’oro','schermo fluorescente'],6.25,1.2,'#ffb3c1',1.95,1.6,.05);
+note(['Rutherford','sorgente di particelle α','lamina d’oro','schermo fluorescente'],6.25,1.2,'#f6dfe2',1.95,1.6,.05);
 const dyy=x=>{if(!FE)return 0;const a=.12,x0=.2,x1=1.1;if(x<x0)return 0;if(x<=x1)return a*(x-x0)*(x-x0);return a*.81+2*a*.9*(x-x1)};
 function simStep(dt,t){TH.E2.forEach((e,i)=>{const x=-1.7+((t*1.4+i/24)%1)*3.6;e.position.set(x,.8+dyy(x),0)});TH.spot.position.set(1.86,.8+dyy(1.86),0);
  TH.pl.forEach((p,i)=>{p.material.emissive.setHex(FE?(i?0x2d7be0:0xd1495b):0);p.material.emissiveIntensity=FE?.6:0});TH.sg.forEach(s=>s.visible=FE);
@@ -132,8 +135,8 @@ function simStep(dt,t){TH.E2.forEach((e,i)=>{const x=-1.7+((t*1.4+i/24)%1)*3.6;e
 $('#fe').onclick=()=>{FE=!FE;$('#fe').textContent='Campo elettrico: '+(FE?'ON':'OFF')};
 G.forEach((gr,i)=>{gr.traverse(o=>{if(o.isMesh){o.userData.gi=i;PK.push(o)}});DM[i].forEach(o=>{o.userData.gi=i;PK.push(o)})});
 /* camera e interazione */
-let yaw=0,pit=1.1,zm=1,focus=0,fz=0;const TA=new THREE.Vector3(.4,.3,.5),TP=new THREE.Vector3(-3.9,.3,.4);
-function cam(){const a=innerWidth/innerHeight,d1=Math.max(10,6.9/(.364*a)),d2=1.12*Math.max(3.3/.364,2.5/(.364*a));fz+=(focus-fz)*.08;const d=(d1+(d2-d1)*fz)*zm,t=TA.clone().lerp(TP,fz);C.position.set(t.x+d*Math.sin(yaw)*Math.cos(pit),t.y+d*Math.sin(pit),t.z+d*Math.cos(yaw)*Math.cos(pit));C.lookAt(t)}
+let yaw=0,pit=1.1,zm=1,focus=0,fz=0;const TA=new THREE.Vector3(0.9,.3,1.0),TP=new THREE.Vector3(-3.9,.3,.4);
+function cam(){const a=innerWidth/innerHeight,d1=Math.max(10,8.2/(.364*a)),d2=1.12*Math.max(3.3/.364,2.5/(.364*a));fz+=(focus-fz)*.08;const d=(d1+(d2-d1)*fz)*zm,t=TA.clone().lerp(TP,fz);C.position.set(t.x+d*Math.sin(yaw)*Math.cos(pit),t.y+d*Math.sin(pit),t.z+d*Math.cos(yaw)*Math.cos(pit));C.lookAt(t)}
 $('#fc').onclick=()=>{focus=focus?0:1;$('#fc').textContent=focus?'Vista d’insieme':'Leggi il foglio'};
 function rs(){R.setSize(innerWidth,innerHeight);C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix()}
 function upd(){$('#pr').textContent=vis.size+'/2 esperimenti'+(flap?' · post-it aperto':'');drawP();drawPI()}
